@@ -1,0 +1,29 @@
+.md-grid {
+  max-width: 1280px;
+}
+
+.md-typeset table:not([class]) {
+  font-size: 0.72rem;
+}
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+  letter-spacing: 0;
+}
+
+.md-typeset img {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  max-width: 100%;
+}
+
+.md-typeset .mermaid {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.md-typeset .mermaid svg {
+  display: block;
+  height: auto;
+  max-width: 100%;
+}

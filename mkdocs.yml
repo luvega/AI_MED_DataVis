@@ -1,0 +1,107 @@
+site_name: 医药数据处理与可视化
+site_description: 面向药学本科生和研究生的医药数据处理与可视化在线教材
+site_url: https://luvega.github.io/AI_MED_DataVis/
+repo_url: https://github.com/luvega/AI_MED_DataVis
+repo_name: luvega/AI_MED_DataVis
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.sections
+    - navigation.path
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: 切换到深色模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: 切换到浅色模式
+
+plugins:
+  - search:
+      lang: zh
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mermaid@10.9.3/dist/mermaid.min.js
+  - javascripts/mermaid-init.js
+
+nav:
+  - 首页: index.md
+  - 全书大纲: book-outline.md
+  - 第一篇 课程入口、工具链与 AI 协作规范:
+      - 第1章 医药数据分析导论: chapters/chapter-1/index.md
+      - 第2章 AI 生产力工具链与项目环境: chapters/chapter-2/index.md
+      - 第3章 AI 任务说明书与协作规范: chapters/chapter-3/index.md
+  - 第二篇 数据结构、读取、清洗与探索性分析:
+      - 第4章 Python 与 R 数据结构基础: chapters/chapter-4/index.md
+      - 第5章 数据读取、数据字典与数据质量: chapters/chapter-5/index.md
+      - 第6章 数据整形、描述统计与探索性可视化: chapters/chapter-6/index.md
+  - 第三篇 图表表达、统计推断与基础建模:
+      - 第7章 图表契约与科研图表规范: chapters/chapter-7/index.md
+      - 第8章 统计推断与组间比较: chapters/chapter-8/index.md
+      - 第9章 相关、回归与分类模型: chapters/chapter-9/index.md
+      - 第10章 模型评估、特征选择与可解释性: chapters/chapter-10/index.md
+  - 第四篇 高维医药数据与 bulk 组学分析:
+      - 第11章 高维矩阵、PCA、聚类与热图: chapters/chapter-11/index.md
+      - 第12章 RNA-seq 数据链条与差异表达分析: chapters/chapter-12/index.md
+      - 第13章 公共数据库、序列数据与医药大数据智能分析: chapters/chapter-13/index.md
+  - 第五篇 单细胞、空间组学与综合项目:
+      - 第14章 单细胞转录组数据处理与可视化: chapters/chapter-14/index.md
+      - 第15章 单细胞进阶、空间组学与综合项目: chapters/chapter-15/index.md
+  - 备课资料:
+      - 第1章课堂任务单: teaching/chapter-1-task-sheet.md
+      - 第6章使用材料清单: teaching/chapter-6-material-list.md
+      - 第6章材料护照: teaching/chapter-6-material-passport.md
+  - 章节大纲:
+      - 第1章大纲: chapters/chapter-1/outline.md
+      - 第2章大纲: chapters/chapter-2/outline.md
+      - 第3章大纲: chapters/chapter-3/outline.md
+      - 第4章大纲: chapters/chapter-4/outline.md
+      - 第5章大纲: chapters/chapter-5/outline.md
+      - 第6章大纲: chapters/chapter-6/outline.md
+      - 第7章大纲: chapters/chapter-7/outline.md
+      - 第8章大纲: chapters/chapter-8/outline.md
+      - 第9章大纲: chapters/chapter-9/outline.md
+      - 第10章大纲: chapters/chapter-10/outline.md
+      - 第11章大纲: chapters/chapter-11/outline.md
+      - 第12章大纲: chapters/chapter-12/outline.md
+      - 第13章大纲: chapters/chapter-13/outline.md
+      - 第14章大纲: chapters/chapter-14/outline.md
+      - 第15章大纲: chapters/chapter-15/outline.md
+  - 参考规范:
+      - 术语表: references/terminology.md
+      - 图表规范: references/figure-guidelines.md
+      - 提示词样例: references/prompt-examples.md
