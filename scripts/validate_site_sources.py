@@ -33,21 +33,23 @@ def first_h1(path: Path) -> str:
     return ""
 
 
-def parse_outline_titles() -> dict[int, str]:
-    outline_path = DOCS_ROOT / "book-outline.md"
-    if not outline_path.exists():
-        fail("docs/book-outline.md is missing")
-    titles: dict[int, str] = {}
-    for line in read_text(outline_path).splitlines():
-        match = re.match(r"### 第(\d+)章\s+(.+)$", line.strip())
-        if match:
-            number = int(match.group(1))
-            if number in CHAPTER_RANGE:
-                titles[number] = match.group(2).strip()
-    missing = [number for number in CHAPTER_RANGE if number not in titles]
-    if missing:
-        fail(f"missing chapter titles in book outline: {missing}")
-    return titles
+CHAPTER_TITLES = {
+    1: "医药数据分析导论",
+    2: "AI 生产力工具链与项目环境",
+    3: "AI 任务说明书与协作规范",
+    4: "Python 与 R 数据结构基础",
+    5: "数据读取、数据字典与数据质量",
+    6: "数据整形、描述统计与探索性可视化",
+    7: "图表契约与科研图表规范",
+    8: "统计推断与组间比较",
+    9: "相关、回归与分类模型",
+    10: "模型评估、特征选择与可解释性",
+    11: "高维矩阵、PCA、聚类与热图",
+    12: "RNA-seq 数据链条与差异表达分析",
+    13: "公共数据库、序列数据与医药大数据智能分析",
+    14: "单细胞转录组数据处理与可视化",
+    15: "单细胞进阶、空间组学与综合项目",
+}
 
 
 def flatten_nav(items: list[object]) -> list[tuple[str, str]]:
@@ -68,6 +70,13 @@ def validate_nav(chapter_titles: dict[int, str]) -> None:
     config = yaml.load(read_text(MKDOCS_CONFIG), Loader=yaml.FullLoader)
     nav_items = flatten_nav(config.get("nav", []))
     nav_by_path = {path: label for label, path in nav_items}
+    forbidden_nav = [
+        (label, path)
+        for label, path in nav_items
+        if path == "book-outline.md" or path.endswith("/outline.md") or "大纲" in label
+    ]
+    if forbidden_nav:
+        fail(f"outline pages must not be in navigation: {forbidden_nav}")
     for number, title in chapter_titles.items():
         body_path = f"chapters/chapter-{number}/index.md"
         expected_label = f"第{number}章 {title}"
@@ -80,16 +89,11 @@ def validate_chapters(chapter_titles: dict[int, str]) -> None:
     for number, title in chapter_titles.items():
         chapter_dir = DOCS_ROOT / "chapters" / f"chapter-{number}"
         body = chapter_dir / "index.md"
-        outline = chapter_dir / "outline.md"
         if not body.exists():
             fail(f"missing chapter body: {body.relative_to(REPO_ROOT)}")
-        if not outline.exists():
-            fail(f"missing chapter outline: {outline.relative_to(REPO_ROOT)}")
         expected_h1 = f"第{number}章 {title}"
         if first_h1(body) != expected_h1:
             fail(f"body H1 mismatch in {body.relative_to(REPO_ROOT)}")
-        if first_h1(outline) != expected_h1:
-            fail(f"outline H1 mismatch in {outline.relative_to(REPO_ROOT)}")
 
 
 def validate_image_links() -> None:
@@ -115,6 +119,16 @@ def validate_no_raw_reference_dir() -> None:
             fail(f"forbidden raw reference path copied into repo: {path.relative_to(REPO_ROOT)}")
 
 
+def validate_no_outline_pages() -> None:
+    forbidden_paths = [DOCS_ROOT / "book-outline.md", *DOCS_ROOT.glob("chapters/chapter-*/outline.md")]
+    existing = [path.relative_to(REPO_ROOT).as_posix() for path in forbidden_paths if path.exists()]
+    if existing:
+        fail(f"outline pages must not be published: {existing}")
+    index = read_text(DOCS_ROOT / "index.md")
+    if "查看大纲" in index or "本章大纲 |" in index:
+        fail("homepage still links to chapter outlines")
+
+
 def validate_required_support_files() -> None:
     required = [
         DOCS_ROOT / "teaching" / "chapter-1-task-sheet.md",
@@ -132,11 +146,12 @@ def validate_required_support_files() -> None:
 def main() -> None:
     if not DOCS_ROOT.exists():
         fail("docs directory is missing")
-    chapter_titles = parse_outline_titles()
+    chapter_titles = CHAPTER_TITLES
     validate_chapters(chapter_titles)
     validate_nav(chapter_titles)
     validate_image_links()
     validate_no_raw_reference_dir()
+    validate_no_outline_pages()
     validate_required_support_files()
     print("Site source validation passed.")
 

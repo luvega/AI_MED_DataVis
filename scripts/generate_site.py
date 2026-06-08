@@ -93,18 +93,13 @@ def copy_chapters() -> None:
         source_dir = SOURCE_ROOT / "chapters" / f"chapter-{chapter_number}"
         target_dir = DOCS_ROOT / "chapters" / f"chapter-{chapter_number}"
         body = chapter_body_path(chapter_number)
-        outline = source_dir / "本章大纲.md"
-        if not outline.exists():
-            raise FileNotFoundError(outline)
         copy_file(body, target_dir / "index.md")
-        copy_file(outline, target_dir / "outline.md")
         assets = source_dir / "assets"
         if assets.exists():
             shutil.copytree(assets, target_dir / "assets", dirs_exist_ok=True)
 
 
 def copy_support_files() -> None:
-    copy_file(SOURCE_ROOT / "大纲.md", DOCS_ROOT / "book-outline.md")
     for source_relative, target_relative in TEACHING_FILES.items():
         copy_file(SOURCE_ROOT / source_relative, DOCS_ROOT / target_relative)
     for source_relative, target_relative in REFERENCE_FILES.items():
@@ -116,14 +111,13 @@ def chapter_links() -> str:
     for part_title, chapter_numbers in PARTS:
         lines.append(f"## {part_title}")
         lines.append("")
-        lines.append("| 章节 | 正文 | 本章大纲 |")
-        lines.append("| --- | --- | --- |")
+        lines.append("| 章节 | 正文 |")
+        lines.append("| --- | --- |")
         for number in chapter_numbers:
             title = CHAPTER_TITLES[number]
             lines.append(
                 f"| 第{number}章 {title} | "
-                f"[进入正文](chapters/chapter-{number}/index.md) | "
-                f"[查看大纲](chapters/chapter-{number}/outline.md) |"
+                f"[进入正文](chapters/chapter-{number}/index.md) |"
             )
         lines.append("")
     return "\n".join(lines)
@@ -132,19 +126,21 @@ def chapter_links() -> str:
 def build_homepage() -> str:
     return f"""# 医药数据处理与可视化
 
-本网站发布《医药数据处理与可视化》在线教材。教材面向药学本科生和研究生，不默认学生具备高级统计、生信或编程背景。
+《医药数据处理与可视化》是一门面向药学本科生和研究生的入门教材。它不把学生预设为程序员，也不把数据分析写成软件命令清单。本书更关心一个学生能否看懂医药数据从哪里来、每一行和每一列代表什么、图表能支持哪一句判断，以及哪些内容必须留给人工核验。
 
-课程主线围绕数据结构、数据清洗、统计解释、图表表达和 AI 协作核验展开。AI 工具用于辅助检查、整理和生成局部代码，不能替代学生判断数据来源、变量含义、统计前提和医学解释边界。
+本书的课程主线从数据对象开始。前几章帮助学生建立项目环境、AI 协作规范和基本数据结构；中间章节进入读取、清洗、描述统计、科研图表和基础模型；后续章节再转向高维矩阵、RNA-seq、公共数据库、单细胞和空间组学。每一章都把“是什么、为什么、怎么检查”放在一起，避免只给出操作步骤而不说明证据边界。
 
-## 核验顺序
+AI 工具在本书中是协作对象，不是结论来源。学生可以让 AI 解释报错、整理任务说明书、生成局部代码和检查图注，但不能让 AI 猜字段含义、替代统计前提判断，或把图中模式写成医学因果。所有关键输出都应能追溯到数据、代码、图表契约、人工核验和仍需确认事项。
 
-| 顺序 | 材料 | 用途 |
+读这本书时，可以先抓住三条线。第一，数据线：原始记录怎样变成可分析表和矩阵。第二，图表线：一个问题怎样对应合适的视觉编码、统计说明和图注。第三，证据线：观察结果、统计推断、模型输出、医学解释和待验证内容怎样分开写。
+
+| 学习线索 | 读者要形成的能力 | 对应章节 |
 | --- | --- | --- |
-| 1 | `AGENTS.md` | 确认项目规则、只读目录、输出路径和写作边界 |
-| 2 | `大纲.md` | 作为全书篇名、章名和小节结构的唯一来源 |
-| 3 | `chapters/chapter-*/本章大纲.md` | 作为各章结构蓝图 |
-| 4 | `chapters/chapter-*/*正文*.md` | 作为在线教材正文来源 |
-| 5 | `references/术语表.md`、`references/图表规范.md`、`references/提示词样例.md` | 统一术语、图表契约和 AI 协作边界 |
+| 数据线 | 识别样本、变量、字段、缺失值、清洗记录和矩阵结构 | 第1、4、5、6、11、12、14章 |
+| 图表线 | 为图表写清问题、数据来源、视觉编码、统计说明和解释边界 | 第6、7、8、9、10、11、12、14章 |
+| AI 协作线 | 写任务说明书，保留 AI 输出、人工修改、运行结果和核验清单 | 第2、3章及各章作业 |
+| 组学线 | 读懂高维矩阵、公共数据库、RNA-seq、单细胞和空间组学的入门流程 | 第11-15章 |
+| 项目线 | 把分析目标、数据结构、代码、图表、报告和答辩组织成可交付项目 | 第15章 |
 
 ## 教材目录
 

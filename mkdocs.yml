@@ -60,7 +60,6 @@ extra_javascript:
 
 nav:
   - 首页: index.md
-  - 全书大纲: book-outline.md
   - 第一篇 课程入口、工具链与 AI 协作规范:
       - 第1章 医药数据分析导论: chapters/chapter-1/index.md
       - 第2章 AI 生产力工具链与项目环境: chapters/chapter-2/index.md
@@ -85,22 +84,6 @@ nav:
       - 第1章课堂任务单: teaching/chapter-1-task-sheet.md
       - 第6章使用材料清单: teaching/chapter-6-material-list.md
       - 第6章材料护照: teaching/chapter-6-material-passport.md
-  - 章节大纲:
-      - 第1章大纲: chapters/chapter-1/outline.md
-      - 第2章大纲: chapters/chapter-2/outline.md
-      - 第3章大纲: chapters/chapter-3/outline.md
-      - 第4章大纲: chapters/chapter-4/outline.md
-      - 第5章大纲: chapters/chapter-5/outline.md
-      - 第6章大纲: chapters/chapter-6/outline.md
-      - 第7章大纲: chapters/chapter-7/outline.md
-      - 第8章大纲: chapters/chapter-8/outline.md
-      - 第9章大纲: chapters/chapter-9/outline.md
-      - 第10章大纲: chapters/chapter-10/outline.md
-      - 第11章大纲: chapters/chapter-11/outline.md
-      - 第12章大纲: chapters/chapter-12/outline.md
-      - 第13章大纲: chapters/chapter-13/outline.md
-      - 第14章大纲: chapters/chapter-14/outline.md
-      - 第15章大纲: chapters/chapter-15/outline.md
   - 参考规范:
       - 术语表: references/terminology.md
       - 图表规范: references/figure-guidelines.md
