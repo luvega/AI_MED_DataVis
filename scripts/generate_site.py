@@ -76,6 +76,9 @@ def remove_generated_dirs() -> None:
 
 def chapter_body_path(chapter_number: int) -> Path:
     chapter_dir = SOURCE_ROOT / "chapters" / f"chapter-{chapter_number}"
+    preferred = chapter_dir / "正文.md"
+    if preferred.exists():
+        return preferred
     candidates = [
         path
         for path in chapter_dir.glob("*.md")
