@@ -40,7 +40,7 @@ CHAPTER_TITLES = {
     4: "Python 与 R 数据结构基础",
     5: "数据读取、数据字典与数据质量",
     6: "数据整形、描述统计与探索性可视化",
-    7: "图表契约与科研图表规范",
+    7: "科研图表规范与 SCI 图表表达",
     8: "统计推断与组间比较",
     9: "相关、回归与分类模型",
     10: "模型评估、特征选择与可解释性",
@@ -120,7 +120,12 @@ def validate_no_raw_reference_dir() -> None:
 
 
 def validate_no_outline_pages() -> None:
-    forbidden_paths = [DOCS_ROOT / "book-outline.md", *DOCS_ROOT.glob("chapters/chapter-*/outline.md")]
+    forbidden_paths = [
+        DOCS_ROOT / "book-outline.md",
+        DOCS_ROOT / "book-outline",
+        *DOCS_ROOT.glob("chapters/chapter-*/outline.md"),
+        *DOCS_ROOT.glob("chapters/chapter-*/outline"),
+    ]
     existing = [path.relative_to(REPO_ROOT).as_posix() for path in forbidden_paths if path.exists()]
     if existing:
         fail(f"outline pages must not be published: {existing}")

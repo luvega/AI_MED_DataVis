@@ -38,7 +38,7 @@ AI 工具在本书中是协作对象，不是结论来源。学生可以让 AI �
 
 | 章节 | 正文 |
 | --- | --- |
-| 第7章 图表契约与科研图表规范 | [进入正文](chapters/chapter-7/index.md) |
+| 第7章 科研图表规范与 SCI 图表表达 | [进入正文](chapters/chapter-7/index.md) |
 | 第8章 统计推断与组间比较 | [进入正文](chapters/chapter-8/index.md) |
 | 第9章 相关、回归与分类模型 | [进入正文](chapters/chapter-9/index.md) |
 | 第10章 模型评估、特征选择与可解释性 | [进入正文](chapters/chapter-10/index.md) |

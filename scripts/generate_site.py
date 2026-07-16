@@ -4,11 +4,13 @@ import os
 import re
 import shutil
 from pathlib import Path
+from urllib.parse import unquote
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = Path(os.environ.get("AI_MED_BOOK_SOURCE", "E:/Codex_Projects/AI_MED_DataVis_Book"))
 DOCS_ROOT = REPO_ROOT / "docs"
+IMAGE_PATTERN = re.compile(r"(!\[[^\]]*\]\()([^)]+)(\))")
 
 CHAPTER_TITLES = {
     1: "医药数据分析导论",
@@ -17,7 +19,7 @@ CHAPTER_TITLES = {
     4: "Python 与 R 数据结构基础",
     5: "数据读取、数据字典与数据质量",
     6: "数据整形、描述统计与探索性可视化",
-    7: "图表契约与科研图表规范",
+    7: "科研图表规范与 SCI 图表表达",
     8: "统计推断与组间比较",
     9: "相关、回归与分类模型",
     10: "模型评估、特征选择与可解释性",
@@ -37,7 +39,7 @@ PARTS = [
 ]
 
 TEACHING_FILES = {
-    "chapters/chapter-1/第1章-课堂任务单-第一版.md": "teaching/chapter-1-task-sheet.md",
+    "outputs/2026-06-06-第一章正文生成/2026-06-06-第1章-课堂任务单.md": "teaching/chapter-1-task-sheet.md",
     "chapters/chapter-6/第6章-使用材料清单.md": "teaching/chapter-6-material-list.md",
     "chapters/chapter-6/第6章-材料护照.md": "teaching/chapter-6-material-passport.md",
 }
@@ -63,8 +65,42 @@ def copy_file(source: Path, target: Path) -> None:
     shutil.copy2(source, target)
 
 
+def materialize_external_images(body: Path, target_dir: Path, content: str) -> str:
+    chapter_dir = body.parent.resolve()
+    source_root = SOURCE_ROOT.resolve()
+
+    def replace(match: re.Match[str]) -> str:
+        target = match.group(2).strip()
+        if target.startswith(("http://", "https://", "data:", "#")):
+            return match.group(0)
+
+        path_part = target.split("#", 1)[0].split("?", 1)[0]
+        source_image = (body.parent / unquote(path_part)).resolve()
+        if not source_image.is_file():
+            return match.group(0)
+
+        try:
+            source_image.relative_to(source_root)
+        except ValueError as error:
+            raise ValueError(f"image target is outside source root: {source_image}") from error
+
+        try:
+            source_image.relative_to(chapter_dir)
+            return match.group(0)
+        except ValueError:
+            pass
+
+        target_image = target_dir / "assets" / source_image.name
+        if target_image.exists() and target_image.read_bytes() != source_image.read_bytes():
+            raise ValueError(f"conflicting chapter asset name: {target_image.name}")
+        copy_file(source_image, target_image)
+        return f"{match.group(1)}assets/{source_image.name}{match.group(3)}"
+
+    return IMAGE_PATTERN.sub(replace, content)
+
+
 def remove_generated_dirs() -> None:
-    for relative in ["chapters", "teaching", "references"]:
+    for relative in ["chapters", "teaching", "references", "book-outline"]:
         target = DOCS_ROOT / relative
         if target.exists():
             shutil.rmtree(target)
@@ -96,10 +132,11 @@ def copy_chapters() -> None:
         source_dir = SOURCE_ROOT / "chapters" / f"chapter-{chapter_number}"
         target_dir = DOCS_ROOT / "chapters" / f"chapter-{chapter_number}"
         body = chapter_body_path(chapter_number)
-        copy_file(body, target_dir / "index.md")
         assets = source_dir / "assets"
         if assets.exists():
             shutil.copytree(assets, target_dir / "assets", dirs_exist_ok=True)
+        content = materialize_external_images(body, target_dir, read_text(body))
+        write_text(target_dir / "index.md", content)
 
 
 def copy_support_files() -> None:

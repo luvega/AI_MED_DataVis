@@ -4,12 +4,12 @@
 
 第8章把分组汇总、箱线图、误差线和图注规范推进到统计推断。学生不再只回答“两组看起来是否不同”，还要说明差异大小、不确定性、检验前提、报告字段和医学解释边界。
 
-本章仍处在 Prompt Coding 阶段。AI 可以辅助生成局部 Python 和 R 代码、解释报错、整理结果表、审阅统计说明。变量含义、分组独立性、检验前提、样本重复结构和医学边界，必须由学生人工核验。
+本章仍处在提示词编程（Prompt Coding）阶段。AI 可以辅助生成局部 Python 和 R 代码、解释报错、整理结果表、审阅统计说明。变量含义、分组独立性、检验前提、样本重复结构和医学边界，必须由学生人工核验。
 
 | 本章承接 | 本章训练 | 后续使用 |
 | --- | --- | --- |
 | 第6章分组汇总、描述统计和探索性图表 | 抽样误差、置信区间、P 值、效应量、两组和多组比较 | 第9章相关与回归、第10章模型评估、第12-15章组学结果解释 |
-| 第7章图表契约和图注规范 | 在图表之外补充样本量、方法、区间、效应量和边界 | 科研图表、课程项目报告和综合答辩 |
+| 第7章的图表设计规范和图注要求 | 在图表之外补充样本量、方法、区间、效应量和边界 | 科研图表、课程项目报告和综合答辩 |
 
 本章贯穿案例采用一张教学模拟 ALT/AST 分组比较表。`control` 和 `treatment` 只是教学分组名，ALT、AST 单位写作 U/L 也只用于演示统计表达。本章不提供临床阈值、疗效判断、诊断建议或机制解释。
 
@@ -130,7 +130,7 @@ data = pd.DataFrame({
 
 这张表只能说明教学模拟数据中的组内概况。ALT 的两组均值看起来相差较大，AST 的两组均值相差较小。是否把差异写成统计推断，还需要检验方法、均值差 CI 和 P 值。
 
-在图表中，误差线必须写清含义。误差线可以表示 SD、SE 或 CI，但三者不能互换。第7章讲过图表契约，本章继续要求学生在结果表和图注中说明误差线含义。
+在图表中，误差线必须写清含义。误差线可以表示 SD、SE 或 CI，但三者不能互换。第7章讲过图表设计规范卡，本章继续要求学生在结果表和图注中说明误差线含义。
 
 ```text
 图注示例：
@@ -157,9 +157,7 @@ P 值（p-value）是在零假设和检验前提成立时，观察到当前或�
 | ALT | -8.75 | [-12.52, -4.98] | 0.0001 | -1.98 | 模拟数据中 treatment 组 ALT 均值低于 control 组 |
 | AST | -2.08 | [-4.54, 0.37] | 0.0926 | -0.72 | 当前模拟样本未提供足够证据支持 AST 均值差异 |
 
-ALT 的均值差 CI 没有跨过 0，且 P 值很小。可以写“在这组教学模拟数据中，treatment 组 ALT 均值低于 control 组”。不能写“treatment 降低肝损伤风险”或“药物有效”。
-
-AST 的均值差 CI 跨过 0，P 值为 0.0926。更稳妥的写法是“当前模拟样本未提供足够证据支持两组 AST 均值存在差异”。不能写“两组完全没有差异”。
+ALT 的均值差 CI 没有跨过 0，且 P 值很小。可以写“在这组教学模拟数据中，treatment 组 ALT 均值低于 control 组”，不能写“treatment 降低肝损伤风险”或“药物有效”。AST 的均值差 CI 跨过 0，P 值为 0.0926。更稳妥的写法是“当前模拟样本未提供足够证据支持两组 AST 均值存在差异”，不能写“两组完全没有差异”。
 
 实际意义需要专业背景。对于 ALT、AST 这类指标，差异是否重要，取决于测量单位、研究设计、基线状态、测量误差、临床阈值和外部证据。本章材料没有提供临床阈值，因此正文不写诊疗判断。
 
@@ -173,6 +171,7 @@ AST 的均值差 CI 跨过 0，P 值为 0.0926。更稳妥的写法是“当前�
 | 配对两组连续变量 | 配对 ID、差值分布、缺失配对 | 配对 t 检验；不适合时考虑 Wilcoxon 符号秩检验 | 平均差、95% CI、P 值、配对说明 |
 | 两组分类变量 | 计数表、期望频数、比例分母 | 卡方检验或 Fisher 精确检验 | 计数、比例、P 值、分母 |
 | 等级或偏态变量 | 分布形态、极端值、测量尺度 | 秩和检验等非参数方法 | 中位数、IQR、检验方法 |
+| 三组及以上连续变量 | 组数、独立性、分布、方差 | 转入 8.4：先做整体检验，再按研究设计选择事后比较 | 整体检验、效应量、事后比较与校正 |
 
 本章示例选择 Welch t 检验作为默认教学方法。原因是它不要求两组方差完全相等，比 Student t 检验更适合作为入门时的保守选择。若真实数据存在强偏态、极端异常值或等级变量，应重新选择方法。
 
@@ -194,25 +193,22 @@ AST 的均值差 CI 跨过 0，P 值为 0.0926。更稳妥的写法是“当前�
 import numpy as np
 import pandas as pd
 from scipy import stats
-from statsmodels.stats.multitest import multipletests
 
-control_alt = [42, 38, 45, 51, 39, 48, 44, 55, 41, 47, 50, 43]
-treat_alt   = [35, 33, 40, 37, 31, 39, 36, 42, 34, 38, 41, 32]
-control_ast = [35, 36, 32, 41, 38, 34, 40, 37, 39, 33, 42, 36]
-treat_ast   = [34, 33, 35, 37, 31, 36, 38, 32, 40, 35, 34, 33]
+required_columns = {"sample_id", "group", "ALT", "AST"}
+missing_columns = required_columns - set(data.columns)
+assert not missing_columns, f"缺少必需字段：{sorted(missing_columns)}"
+assert data["sample_id"].notna().all(), "sample_id 存在缺失"
+assert not data["sample_id"].duplicated().any(), "sample_id 存在重复"
+assert data[["group", "ALT", "AST"]].notna().all().all(), "分组或指标存在缺失"
+assert set(data["group"].unique()) == {"control", "treatment"}, "分组水平不符合预期"
 
-def group_summary(x):
-    x = np.asarray(x, dtype=float)
-    n = len(x)
-    mean = x.mean()
-    sd = x.std(ddof=1)
-    se = sd / np.sqrt(n)
-    ci_low, ci_high = stats.t.interval(0.95, n - 1, loc=mean, scale=se)
-    return n, mean, sd, se, ci_low, ci_high
+group_counts = data.groupby("group", observed=True).size().rename("n")
+assert (group_counts > 1).all(), "每组至少需要 2 个观测值"
+print(group_counts)
 
-def welch_result(control, treatment):
-    control = np.asarray(control, dtype=float)
-    treatment = np.asarray(treatment, dtype=float)
+def welch_result(frame, indicator):
+    control = frame.loc[frame["group"] == "control", indicator].to_numpy(dtype=float)
+    treatment = frame.loc[frame["group"] == "treatment", indicator].to_numpy(dtype=float)
     diff = treatment.mean() - control.mean()
     v1 = control.var(ddof=1) / len(control)
     v2 = treatment.var(ddof=1) / len(treatment)
@@ -224,54 +220,89 @@ def welch_result(control, treatment):
                          (len(treatment) - 1) * treatment.var(ddof=1)) /
                         (len(control) + len(treatment) - 2))
     cohen_d = diff / pooled_sd
-    return diff, ci_low, ci_high, t_stat, p_value, cohen_d
+    return {
+        "indicator": indicator,
+        "control_n": len(control),
+        "treatment_n": len(treatment),
+        "control_mean": control.mean(),
+        "treatment_mean": treatment.mean(),
+        "mean_diff": diff,
+        "ci_low": ci_low,
+        "ci_high": ci_high,
+        "t_value": t_stat,
+        "df": df,
+        "p_value": p_value,
+        "cohen_d": cohen_d,
+    }
 
-for name, c, t in [("ALT", control_alt, treat_alt), ("AST", control_ast, treat_ast)]:
-    print(name, group_summary(c), group_summary(t), welch_result(c, t))
+result_table = pd.DataFrame(
+    [welch_result(data, indicator) for indicator in ["ALT", "AST"]]
+)
+print(result_table.round(6).to_string(index=False))
 ```
 
-这段代码的核验重点不是“能打印结果”本身，而是学生能说明 `treatment.mean() - control.mean()` 的方向。如果顺序写反，均值差符号会改变，解释也会改变。
+代码先检查必需字段、重复样本编号、缺失值、分组水平和各组样本量，再计算结果。输出表把两组 n、两组均值、treatment-control 均值差、95% CI、t 值、自由度、P 值和 Cohen's d 放在同一行。若均值差顺序写反，符号和解释也会反向。
 
 ### R 示例
 
 ```r
-control_alt <- c(42,38,45,51,39,48,44,55,41,47,50,43)
-treat_alt   <- c(35,33,40,37,31,39,36,42,34,38,41,32)
-control_ast <- c(35,36,32,41,38,34,40,37,39,33,42,36)
-treat_ast   <- c(34,33,35,37,31,36,38,32,40,35,34,33)
+analysis_data <- data.frame(
+  sample_id = c(sprintf("C%02d", 1:12), sprintf("T%02d", 1:12)),
+  group = rep(c("control", "treatment"), each = 12),
+  ALT = c(42,38,45,51,39,48,44,55,41,47,50,43,
+          35,33,40,37,31,39,36,42,34,38,41,32),
+  AST = c(35,36,32,41,38,34,40,37,39,33,42,36,
+          34,33,35,37,31,36,38,32,40,35,34,33),
+  stringsAsFactors = FALSE
+)
 
-group_summary <- function(x) {
-  n <- length(x)
-  mean_x <- mean(x)
-  sd_x <- sd(x)
-  se_x <- sd_x / sqrt(n)
-  ci <- mean_x + qt(c(0.025, 0.975), df = n - 1) * se_x
-  data.frame(n = n, mean = mean_x, sd = sd_x, se = se_x,
-             ci_low = ci[1], ci_high = ci[2])
+required_columns <- c("sample_id", "group", "ALT", "AST")
+missing_columns <- setdiff(required_columns, names(analysis_data))
+if (length(missing_columns) > 0) stop("缺少必需字段")
+if (anyNA(analysis_data$sample_id)) stop("sample_id 存在缺失")
+if (anyDuplicated(analysis_data$sample_id)) stop("sample_id 存在重复")
+if (anyNA(analysis_data[c("group", "ALT", "AST")])) stop("分组或指标存在缺失")
+if (!setequal(unique(analysis_data$group), c("control", "treatment"))) {
+  stop("分组水平不符合预期")
 }
 
-welch_result <- function(control, treatment) {
+group_counts <- table(analysis_data$group)
+if (any(group_counts <= 1)) stop("每组至少需要 2 个观测值")
+print(group_counts)
+
+welch_result <- function(frame, indicator) {
+  control <- frame[frame$group == "control", indicator]
+  treatment <- frame[frame$group == "treatment", indicator]
   tt <- t.test(treatment, control, var.equal = FALSE)
   pooled_sd <- sqrt(((length(control) - 1) * var(control) +
                      (length(treatment) - 1) * var(treatment)) /
                     (length(control) + length(treatment) - 2))
   diff <- mean(treatment) - mean(control)
   data.frame(
+    indicator = indicator,
+    control_n = length(control),
+    treatment_n = length(treatment),
+    control_mean = mean(control),
+    treatment_mean = mean(treatment),
     mean_diff = diff,
     ci_low = tt$conf.int[1],
     ci_high = tt$conf.int[2],
+    t_value = unname(tt$statistic),
+    df = unname(tt$parameter),
     p_value = tt$p.value,
-    cohen_d = diff / pooled_sd
+    cohen_d = diff / pooled_sd,
+    row.names = NULL
   )
 }
 
-group_summary(control_alt)
-group_summary(treat_alt)
-welch_result(control_alt, treat_alt)
-welch_result(control_ast, treat_ast)
+result_table <- do.call(
+  rbind,
+  lapply(c("ALT", "AST"), function(x) welch_result(analysis_data, x))
+)
+print(result_table, digits = 6, row.names = FALSE)
 ```
 
-R 的 `t.test(treatment, control)` 默认返回第一个向量均值减第二个向量均值。学生要核对输出中的 `mean of x` 和 `mean of y`，确认表中写的是 treatment-control 还是 control-treatment。
+R 代码采用同一字段、检查顺序和差值方向，并用 `print()` 显式输出分组样本量与结果表。`t.test(treatment, control)` 的 CI 对应 treatment-control；跨语言核验时应逐列比较方向和数值，不能只比较 P 值。
 
 ### 统计说明模板
 
@@ -293,6 +324,8 @@ R 的 `t.test(treatment, control)` 默认返回第一个向量均值减第二个
 | 同时比较 ALT、AST、age、response 等多个指标 | 只挑阳性结果会误导 | 列出比较总数，报告校正方法 |
 | 高维基因表达筛选 | 成千上万个检验会产生大量偶然阳性 | 同时报告 fold change 和 adjusted P value / FDR |
 | 单细胞每个细胞都当独立样本 | 伪重复会低估不确定性 | 回到样本或受试者层面，说明重复定义 |
+
+问题族（family of hypotheses）是为共同回答同一预设研究问题而实施的一组检验。应在查看 P 值前根据研究设计确定问题族，不能因某个结果达到显著性阈值而事后拆分。本例把同一份教学报告中的六个指标视为一个问题族。
 
 调整后 P 值（adjusted P value / padj）用于多重检验后的错误控制。FDR（false discovery rate，错误发现率）常用于高维筛选任务，例如差异表达分析。本章只讲直觉和报告边界，不展开 RNA-seq 或单细胞差异表达模型。
 
@@ -317,7 +350,8 @@ p_values <- c(0.0001, 0.0926, 0.1800, 0.0410, 0.2200, 0.0090)
 names <- c("ALT", "AST", "age", "response_rate", "AST_ALT_ratio", "marker_X")
 
 padj <- p.adjust(p_values, method = "BH")
-data.frame(endpoint = names, p_value = p_values, padj = padj)
+print(data.frame(endpoint = names, p_value = p_values, padj = padj),
+      row.names = FALSE)
 ```
 
 | 指标 | 未校正 P 值 | BH 校正后 P 值 | 教材解释 |
@@ -403,7 +437,7 @@ B 和 C 的绝对数量没有变，但比例从 33.3% 变为 25.0%。如果测�
 | 数据背景 | 教学模拟分析表，字段包括 `sample_id`、`group`、`ALT`、`AST`、`age`、`sex`、`response` |
 | 任务目标 | 比较 control 与 treatment 两组 ALT/AST 水平，完成检验前检查、方法选择、统计结果表和克制解释 |
 | 操作步骤 | 核对数据字典；检查缺失和分组 n；绘制分组分布图；选择 Welch t 检验或说明替代方法；报告原始单位差异和 95% CI；补充标准化效应量；检查多重检验；写解释边界 |
-| 交付物 | 检验前检查表、图表契约、Python 代码、R 代码、结果表、统计说明、需人工确认列表、AI 协作记录 |
+| 交付物 | 检验前检查表、图表设计规范卡、Python 代码、R 代码、结果表、统计说明、需人工确认列表、AI 协作记录 |
 | 禁止事项 | 不写治疗有效；不把 P 值写成临床意义；不隐藏未支持差异的结果；不让 AI 猜列名、单位或分组含义 |
 
 ## 图表建议
@@ -523,7 +557,7 @@ flowchart TD
 | 任务 3 | 报告原始单位差异、95% CI、P 值和 Cohen's d |
 | 任务 4 | 对 6 个模拟指标做 BH 校正，并解释未校正和校正后结论差异 |
 | 任务 5 | 写一段不超过 200 字的统计说明，必须包含解释边界 |
-| 提交 | 代码、结果表、图表契约、统计说明、AI 协作记录、需人工确认列表 |
+| 提交 | 代码、结果表、图表设计规范卡、统计说明、AI 协作记录、需人工确认列表 |
 | 禁止 | 不写真实疗效、诊断建议、机制解释或临床阈值 |
 
 ### 评分提示
