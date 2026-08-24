@@ -5,10 +5,9 @@
 | 类型 | 材料 |
 | --- | --- |
 | 项目规则 | `AGENTS.md` |
-| 课程大纲 | `syllabus/36课时-AI前置调整版.md` |
-| 本地技能库 | `E:\Codex_Projects\codex-skills\skills\nature-biofigure-coder\references\figure_contract.md` |
-| 本地技能库 | `E:\Codex_Projects\codex-skills\skills\nature-figure-compliance\references\figure_contract_qc.md` |
-| 本地技能库 | `E:\Codex_Projects\codex-skills\skills\course-evidence-review` |
+| 课程大纲 | `syllabus/36课时-统一融合修订版.md` |
+| 图表规范 | `nature-biofigure-coder`与`nature-figure-compliance`中的图表契约原则 |
+| 证据规范 | `academic-research-suite`与`biomedical-research-framework` |
 | 参考资料 | `参考资料/An_Introduction_to_Statistical_Learning__with_Applications_Python_上.md` 等 ISL 资料 |
 | 参考资料 | `参考资料/生物医药大数据与智能分析_上.md`、`参考资料/生物医药大数据与智能分析_下.md` |
 | 参考资料 | `参考资料/bioconductor_books/workflow_case_catalog.md` |

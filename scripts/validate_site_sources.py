@@ -14,6 +14,17 @@ DOCS_ROOT = REPO_ROOT / "docs"
 MKDOCS_CONFIG = REPO_ROOT / "mkdocs.yml"
 CHAPTER_RANGE = range(1, 16)
 IMAGE_PATTERN = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
+FORBIDDEN_LEGACY_TERMS = ("拓展线", "双轨项目", "NGS拓展", "表格项目", "NGS项目")
+FORBIDDEN_PUBLIC_SUFFIXES = {".zip", ".log"}
+SENSITIVE_PATTERNS = {
+    "private IPv4 address": re.compile(
+        r"\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})\b"
+    ),
+    "local user path": re.compile(r"(?i)\b[A-Z]:\\Users\\[^\\\s]+"),
+    "workspace path": re.compile(r"(?i)\b[A-Z]:\\Codex_Projects\\"),
+    "JWT-like token": re.compile(r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b"),
+    "bearer token": re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._~+/=-]{12,}"),
+}
 
 
 def read_text(path: Path) -> str:
@@ -136,6 +147,10 @@ def validate_no_outline_pages() -> None:
 
 def validate_required_support_files() -> None:
     required = [
+        DOCS_ROOT / "teaching" / "36-hour-syllabus.md",
+        DOCS_ROOT / "teaching" / "36-hour-learning-map.md",
+        DOCS_ROOT / "teaching" / "18-week-teacher-plan.md",
+        DOCS_ROOT / "teaching" / "unified-project-template.md",
         DOCS_ROOT / "teaching" / "chapter-1-task-sheet.md",
         DOCS_ROOT / "teaching" / "chapter-6-material-list.md",
         DOCS_ROOT / "teaching" / "chapter-6-material-passport.md",
@@ -148,6 +163,39 @@ def validate_required_support_files() -> None:
             fail(f"missing support file: {path.relative_to(REPO_ROOT)}")
 
 
+def validate_unified_course_plan() -> None:
+    syllabus_path = DOCS_ROOT / "teaching" / "36-hour-syllabus.md"
+    syllabus = read_text(syllabus_path)
+    week_rows = re.findall(r"^\| 第(\d+)周，(\d+)学时 \|", syllabus, flags=re.MULTILINE)
+    weeks = [int(week) for week, _ in week_rows]
+    hours = [int(hour) for _, hour in week_rows]
+    if weeks != list(range(1, 19)) or sum(hours) != 36:
+        fail(f"course plan must contain one 18-week, 36-hour route: weeks={weeks}, hours={sum(hours)}")
+
+
+def validate_no_restricted_or_sensitive_content() -> None:
+    forbidden_files = [
+        path.relative_to(REPO_ROOT).as_posix()
+        for path in DOCS_ROOT.rglob("*")
+        if path.is_file() and path.suffix.lower() in FORBIDDEN_PUBLIC_SUFFIXES
+    ]
+    if forbidden_files:
+        fail(f"restricted file types must not be published: {forbidden_files}")
+
+    for path in DOCS_ROOT.rglob("*"):
+        if not path.is_file() or path.suffix.lower() not in {".md", ".txt", ".csv", ".json", ".yml", ".yaml"}:
+            continue
+        text = read_text(path)
+        legacy_hits = [term for term in FORBIDDEN_LEGACY_TERMS if term in text]
+        if legacy_hits:
+            fail(f"legacy course-route terms in {path.relative_to(REPO_ROOT)}: {legacy_hits}")
+        if "NGS00_移交包_2026-08-21.zip" in text or "00_受限原始包" in text:
+            fail(f"restricted handoff material referenced in {path.relative_to(REPO_ROOT)}")
+        for label, pattern in SENSITIVE_PATTERNS.items():
+            if pattern.search(text):
+                fail(f"{label} found in {path.relative_to(REPO_ROOT)}")
+
+
 def main() -> None:
     if not DOCS_ROOT.exists():
         fail("docs directory is missing")
@@ -158,6 +206,8 @@ def main() -> None:
     validate_no_raw_reference_dir()
     validate_no_outline_pages()
     validate_required_support_files()
+    validate_unified_course_plan()
+    validate_no_restricted_or_sensitive_content()
     print("Site source validation passed.")
 
 

@@ -5,15 +5,15 @@
 | 类型 | 材料 |
 | --- | --- |
 | 项目规则 | `AGENTS.md` |
-| 课程大纲 | `syllabus/36课时-AI前置调整版.md` |
+| 课程大纲 | `syllabus/36课时-统一融合修订版.md` |
 | 参考资料 | `参考资料/Python程序设计-以医药数据为例_上.md`、`参考资料/Python程序设计-以医药数据为例_下.md` |
 | 参考资料 | `参考资料/生物医药大数据与智能分析_上.md`、`参考资料/生物医药大数据与智能分析_下.md` |
 | 参考资料 | `参考资料/An_Introduction_to_Statistical_Learning__with_Applications_Python_上.md` 等 ISL 资料 |
 | 参考资料 | `参考资料/aidd_bioinformatics/aidd.course_index.md` |
 | 参考资料 | `参考资料/bioconductor_books/workflow_case_catalog.md` |
 | 参考资料 | `参考资料/sc_best_practices/scbp.course_index.md` |
-| 本地技能库 | `E:\Codex_Projects\codex-skills\skills\academic-chinese-style` |
-| 本地技能库 | `E:\Codex_Projects\codex-skills\skills\course-evidence-review` |
+| 写作规范 | `academic-chinese-style` |
+| 证据规范 | `academic-research-suite`与`biomedical-research-framework` |
 
 ## 使用规则
 
@@ -134,6 +134,19 @@
 | marker gene | marker gene | 在特定细胞群中相对高表达、用于辅助注释的基因 | 单细胞章节 | 写成绝对专属基因 |
 | UMAP | UMAP | 用于展示高维单细胞数据低维结构的降维方法 | 第14章 | 写成真实空间距离 |
 | 批次效应 | batch effect | 由实验批次、平台、处理时间等引入的非生物差异 | 组学质控 | 与真实生物差异混在一起 |
+| 样本表 | 样本表（sample sheet） | 记录样本ID、分组、批次、文库和文件对应关系的结构化表 | 第5、12-14章 | 只保留文件名而不记录实验设计 |
+| 校验和 | 校验和（checksum） | 用哈希算法生成的文件完整性指纹；本课程归档优先记录SHA-256 | 第2、5、13章 | 写成版权、真实性或内容正确性的证明 |
+| 工作流 | 工作流（workflow） | 从输入、处理、参数、日志到输出的可追踪计算步骤 | 第2、12、13章 | 只列软件名，不记录版本、输入和失败状态 |
+| 文库大小 | 文库大小（library size） | 一个测序样本进入计数矩阵的总计数或有效片段总量，具体口径随流程说明 | 第6、12章 | 直接当作样本质量合格结论 |
+| FASTQ | FASTQ | 记录测序reads及其逐碱基质量字符的文本格式 | 第12、13章 | 把FASTQ文件数当作生物学重复数 |
+| BAM/CRAM | BAM/CRAM | 保存相对参考序列比对记录的二进制格式；CRAM通常依赖参考序列解码 | 第13章 | 有比对文件即认为变异或表达结论可靠 |
+| GTF/GFF | GTF/GFF | 描述基因、转录本及其他基因组注释特征的坐标格式 | 第12、13章 | 忽略参考基因组和注释版本 |
+| BED | BED | 表示基因组区间及可选注释字段的文本格式 | 第13、15章 | 不说明零基/一基坐标和端点约定 |
+| BigWig | BigWig | 以索引形式保存连续基因组信号、便于按区域浏览的格式 | 第7、13章 | 把轨迹高度直接写成机制强度 |
+| peak | peak（富集区域） | 在ATAC-seq、ChIP-seq等数据中由算法识别的信号富集区间 | 第13、15章 | 写成已证实直接调控位点 |
+| motif | motif（序列基序） | 在序列中重复出现、可与候选结合偏好相关的模式 | 第15章 | 有motif即证明相应蛋白真实结合 |
+| 伪重复 | pseudoreplication | 把同一供体或实验单位内的多个测量误当成独立生物学重复 | 第8、14章 | 用细胞数替代供体或独立实验数 |
+| 多模态证据卡 | multimodal evidence card | 记录证据类型、观察单位、测量量、允许解释和不能支持结论的结构化条目 | 第15章 | 把不同研究结果拼成同一样本联合机制 |
 
 ## 动词强度建议
 

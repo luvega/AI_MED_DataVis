@@ -39,10 +39,17 @@ PARTS = [
 ]
 
 TEACHING_FILES = {
+    "syllabus/36课时-统一融合修订版.md": "teaching/36-hour-syllabus.md",
+    "syllabus/36课时-学生学习地图.md": "teaching/36-hour-learning-map.md",
+    "outputs/2026-08-21-NGS00移交包归档与课程融合更新/2026-08-21-18周教师教案.md": "teaching/18-week-teacher-plan.md",
+    "outputs/2026-08-21-NGS00移交包归档与课程融合更新/2026-08-21-统一综合项目模板.md": "teaching/unified-project-template.md",
     "outputs/2026-06-06-第一章正文生成/2026-06-06-第1章-课堂任务单.md": "teaching/chapter-1-task-sheet.md",
     "chapters/chapter-6/第6章-使用材料清单.md": "teaching/chapter-6-material-list.md",
     "chapters/chapter-6/第6章-材料护照.md": "teaching/chapter-6-material-passport.md",
 }
+
+UNIFIED_SYLLABUS = SOURCE_ROOT / "syllabus" / "36课时-统一融合修订版.md"
+FORBIDDEN_LEGACY_TERMS = ("拓展线", "双轨项目", "NGS拓展", "表格项目", "NGS项目")
 
 REFERENCE_FILES = {
     "references/术语表.md": "references/terminology.md",
@@ -168,19 +175,17 @@ def build_homepage() -> str:
 
 《医药数据处理与可视化》是一门面向药学本科生和研究生的入门教材。它不把学生预设为程序员，也不把数据分析写成软件命令清单。本书更关心一个学生能否看懂医药数据从哪里来、每一行和每一列代表什么、图表能支持哪一句判断，以及哪些内容必须留给人工核验。
 
-本书的课程主线从数据对象开始。前几章帮助学生建立项目环境、AI 协作规范和基本数据结构；中间章节进入读取、清洗、描述统计、科研图表和基础模型；后续章节再转向高维矩阵、RNA-seq、公共数据库、单细胞和空间组学。每一章都把“是什么、为什么、怎么检查”放在一起，避免只给出操作步骤而不说明证据边界。
+本书只有一套必修课程路径。前几章帮助学生建立项目环境、AI 协作规范和基本数据结构；中间章节进入读取、清洗、描述统计、科研图表和基础模型；后续章节用同一分析框架处理高维矩阵、RNA-seq、公共数据库、单细胞和空间组学。每一章都把“是什么、为什么、怎么检查”放在一起。
 
 AI 工具在本书中是协作对象，不是结论来源。学生可以让 AI 解释报错、整理任务说明书、生成局部代码和检查图注，但不能让 AI 猜字段含义、替代统计前提判断，或把图中模式写成医学因果。所有关键输出都应能追溯到数据、代码、图表契约、人工核验和仍需确认事项。
 
-读这本书时，可以先抓住三条线。第一，数据线：原始记录怎样变成可分析表和矩阵。第二，图表线：一个问题怎样对应合适的视觉编码、统计说明和图注。第三，证据线：观察结果、统计推断、模型输出、医学解释和待验证内容怎样分开写。
+贯穿案例使用Bioconductor `airway`：8个人气道平滑肌细胞bulk RNA-seq样本，来自4个细胞系，每个细胞系有地塞米松处理与未处理样本。它连接metadata、计数矩阵、样本质控、标准化、PCA、热图、差异表达和富集审阅。相关、回归和分类继续使用现有医药表格小案例，因为8个样本不适合预测建模。细胞实验结果不能外推为临床疗效或疾病机制。
 
-| 学习线索 | 读者要形成的能力 | 对应章节 |
+| 统一主线 | 递进关系 | 读者要形成的能力 |
 | --- | --- | --- |
-| 数据线 | 识别样本、变量、字段、缺失值、清洗记录和矩阵结构 | 第1、4、5、6、11、12、14章 |
-| 图表线 | 为图表写清问题、数据来源、视觉编码、统计说明和解释边界 | 第6、7、8、9、10、11、12、14章 |
-| AI 协作线 | 写任务说明书，保留 AI 输出、人工修改、运行结果和核验清单 | 第2、3章及各章作业 |
-| 组学线 | 读懂高维矩阵、公共数据库、RNA-seq、单细胞和空间组学的入门流程 | 第11-15章 |
-| 项目线 | 把分析目标、数据结构、代码、图表、报告和答辩组织成可交付项目 | 第15章 |
+| 数据主线 | 医药表格 → 样本元数据 → 计数矩阵 → 高维结果 → 单细胞和多组学结果 | 识别观察单位、字段、矩阵方向、来源和质量风险 |
+| 分析主线 | 读取整理 → 质量检查 → 统计推断 → 可视化 → 差异分析 → 证据综合 | 让方法、图表和解释与问题及设计对齐 |
+| AI主线 | 问题拆解 → 代码生成 → 错误诊断 → 结果核验 → 证据审查 → 可复现交付 | 保留任务说明、人工修改、运行结果和证据边界 |
 
 ## 教材目录
 
@@ -189,6 +194,10 @@ AI 工具在本书中是协作对象，不是结论来源。学生可以让 AI �
 
 | 材料 | 页面 |
 | --- | --- |
+| 36课时统一课程计划 | [查看](teaching/36-hour-syllabus.md) |
+| 18周学生学习地图 | [查看](teaching/36-hour-learning-map.md) |
+| 18周教师教案 | [查看](teaching/18-week-teacher-plan.md) |
+| 统一综合项目模板 | [查看](teaching/unified-project-template.md) |
 | 第1章课堂任务单 | [查看](teaching/chapter-1-task-sheet.md) |
 | 第6章使用材料清单 | [查看](teaching/chapter-6-material-list.md) |
 | 第6章材料护照 | [查看](teaching/chapter-6-material-passport.md) |
@@ -208,12 +217,43 @@ def verify_source_outline() -> None:
         pattern = rf"### 第{number}章 {re.escape(title)}"
         if not re.search(pattern, outline):
             raise ValueError(f"chapter title not found in root outline: 第{number}章 {title}")
+    legacy_hits = [term for term in FORBIDDEN_LEGACY_TERMS if term in outline]
+    if legacy_hits:
+        raise ValueError(f"legacy course-route terms found in root outline: {legacy_hits}")
+
+
+def verify_unified_syllabus() -> None:
+    if not UNIFIED_SYLLABUS.exists():
+        raise FileNotFoundError(f"unified syllabus not found: {UNIFIED_SYLLABUS}")
+    syllabus = read_text(UNIFIED_SYLLABUS)
+    if "# 《医药数据处理与可视化》36课时统一融合修订版" not in syllabus:
+        raise ValueError("unified syllabus title or course name is incorrect")
+
+    week_rows = re.findall(r"^\| 第(\d+)周，(\d+)学时 \|(.+)$", syllabus, flags=re.MULTILINE)
+    weeks = [int(week) for week, _, _ in week_rows]
+    hours = [int(hour) for _, hour, _ in week_rows]
+    if weeks != list(range(1, 19)):
+        raise ValueError(f"unified syllabus must contain weeks 1-18 exactly once: {weeks}")
+    if sum(hours) != 36:
+        raise ValueError(f"unified syllabus must total 36 hours, got {sum(hours)}")
+    if "合计：18个教学单元，36学时。" not in syllabus:
+        raise ValueError("unified syllabus total statement is missing")
+    for week, _, remainder in week_rows:
+        cells = [cell.strip() for cell in remainder.split("|") if cell.strip()]
+        if len(cells) != 6:
+            raise ValueError(f"week {week} must contain 7 table cells including week/hour")
+        if len(cells[2]) < 12:
+            raise ValueError(f"week {week} AI task is not concrete enough")
+    legacy_hits = [term for term in FORBIDDEN_LEGACY_TERMS if term in syllabus]
+    if legacy_hits:
+        raise ValueError(f"legacy course-route terms found in unified syllabus: {legacy_hits}")
 
 
 def main() -> None:
     if not SOURCE_ROOT.exists():
         raise FileNotFoundError(f"source root not found: {SOURCE_ROOT}")
     verify_source_outline()
+    verify_unified_syllabus()
     remove_generated_dirs()
     copy_chapters()
     copy_support_files()

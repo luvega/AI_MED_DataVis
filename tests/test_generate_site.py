@@ -64,5 +64,48 @@ class CopyChaptersTests(unittest.TestCase):
 
             self.assertFalse(outline_page.parent.exists())
 
+    def test_accepts_exactly_18_weeks_and_36_hours(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            syllabus = Path(temp_dir) / "syllabus.md"
+            rows = "\n".join(
+                f"| 第{week}周，2学时 | 主题 | 具体教学内容与课堂活动 | AI检查具体数据代码结果 | 重点 | 难点 | 保存产物 |"
+                for week in range(1, 19)
+            )
+            syllabus.write_text(
+                "# 《医药数据处理与可视化》36课时统一融合修订版\n\n"
+                + rows
+                + "\n\n合计：18个教学单元，36学时。\n",
+                encoding="utf-8",
+            )
+
+            with patch.object(generate_site, "UNIFIED_SYLLABUS", syllabus):
+                generate_site.verify_unified_syllabus()
+
+    def test_rejects_incomplete_unified_syllabus(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            syllabus = Path(temp_dir) / "syllabus.md"
+            rows = "\n".join(
+                f"| 第{week}周，2学时 | 主题 | 具体教学内容与课堂活动 | AI检查具体数据代码结果 | 重点 | 难点 | 保存产物 |"
+                for week in range(1, 18)
+            )
+            syllabus.write_text(
+                "# 《医药数据处理与可视化》36课时统一融合修订版\n\n"
+                + rows
+                + "\n\n合计：18个教学单元，36学时。\n",
+                encoding="utf-8",
+            )
+
+            with patch.object(generate_site, "UNIFIED_SYLLABUS", syllabus):
+                with self.assertRaises(ValueError):
+                    generate_site.verify_unified_syllabus()
+
+    def test_homepage_uses_one_ai_airway_course_route(self) -> None:
+        homepage = generate_site.build_homepage()
+        self.assertIn("airway", homepage)
+        self.assertIn("数据主线", homepage)
+        self.assertIn("AI主线", homepage)
+        for term in generate_site.FORBIDDEN_LEGACY_TERMS:
+            self.assertNotIn(term, homepage)
+
 if __name__ == "__main__":
     unittest.main()

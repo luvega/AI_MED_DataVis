@@ -5,13 +5,13 @@
 | 类型 | 材料 |
 | --- | --- |
 | 项目规则 | `AGENTS.md` |
-| 课程大纲 | `syllabus/36课时-AI前置调整版.md` |
+| 课程大纲 | `syllabus/36课时-统一融合修订版.md` |
 | 参考资料 | `参考资料/Starting_Data_Analytics_with_Generative_AI_and_Python_200.md` |
 | 参考资料 | `参考资料/Starting_Data_Analytics_with_Generative_AI_and_Python_362.md` |
 | 参考资料 | `参考资料/ai_lingnan_book_2026-06-05/markdown/chapters/chapter-5/section-5-2.md` |
 | 参考资料 | `参考资料/ai_lingnan_book_2026-06-05/markdown/chapters/chapter-18/section-18-3.md` |
-| 本地技能库 | `E:\Codex_Projects\codex-skills\skills\course-lecture-expand` |
-| 本地技能库 | `E:\Codex_Projects\codex-skills\skills\course-evidence-review` |
+| 教学设计规范 | `academic-presentation-teaching` |
+| 证据规范 | `academic-research-suite`与`biomedical-research-framework` |
 
 ## 提示词使用规则
 
@@ -453,3 +453,53 @@ pass / revise-before-use / needs-source-review
 | 修改 | 写清人工修改了什么 |
 | 结果 | 放最终表、图、代码或结论 |
 | 反思 | 写清下次会如何改进提示词或核验 |
+
+## airway只读探索与代码核验提示词
+
+```text
+目标：
+读取 sample_metadata.csv，只描述数据结构并完成输入核验。
+
+已知上下文：
+- 文件应包含8个bulk RNA-seq样本。
+- 4个cell_line各包含trt和untrt两个样本。
+- 真实字段见文件，不得假设存在group列。
+
+约束：
+- 只读，不覆盖输入文件。
+- 先输出路径、shape、列名和类型，再做唯一性与交叉表检查。
+- 不解释药物疗效、疾病机制或临床意义。
+- 代码每一步后给出预期检查，不把“未报错”当作验证通过。
+
+验证：
+- sample_id为8个且唯一。
+- cell_line为4个；cell_line×treatment的8种配对各出现1次。
+- 报告缺失、重复和无法确认字段。
+
+输出：
+1. 可运行的最小代码；
+2. 检查结果表；
+3. AI可能误判的位置；
+4. 仍需人工确认事项。
+```
+
+## 多模态证据卡审阅提示词
+
+```text
+目标：
+审阅 multimodal_evidence_cards.csv 和给定结果摘要，把每项主张限制在相应证据层级。
+
+上下文：
+- 证据可能包括bulk RNA、单细胞RNA、ATAC peak、motif、ChIP信号和空间结果。
+- 先检查是否来自同一样本、同一研究以及设计是否兼容。
+
+约束：
+- 不把差异表达写成直接调控。
+- 不把ATAC peak或motif写成真实结合。
+- 不把ChIP信号写成功能因果。
+- 不把跨研究共现拼接成同一样本联合机制。
+- 证据不足处写“需补证据”或“需人工确认”。
+
+输出表：
+| 主张 | 观察结果 | 方法来源 | 允许解释 | 替代解释 | 仍需验证 | 修改后的边界化表述 |
+```

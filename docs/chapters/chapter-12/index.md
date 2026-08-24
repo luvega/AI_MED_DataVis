@@ -815,7 +815,17 @@ flowchart TB
 | 位置 | 当前缺口 | 正文处理 |
 | --- | --- | --- |
 | airway 具体基因功能 | 本章未逐基因检索文献或做功能实验 | 只报告差异表达字段，不解释机制 |
-| airway 功能富集 | 本轮未运行 ORA/GSEA | 只给输入结构和代码骨架，不生成通路词条 |
+| airway 功能富集 | 本轮已按上调、下调分别运行GO Biological Process ORA | 保留完整结果、背景和BH校正；不写成通路被实验证实激活 |
 | 课堂阈值选择 | `padj < 0.05` 且 `|log2FC| >= 1` 为本章展示规则 | 保留完整结果，项目中需预先说明阈值依据 |
 | AIDD 字幕中的软件与命令 | 字幕存在术语误识别和版本不明 | 只采用流程线索，具体命令以官方文档为准 |
 | 临床意义 | airway 为细胞系 RNA-seq 教学数据，无患者结局分析 | 不写疗效、诊断、预后或临床建议 |
+
+## 统一课程融合接口
+
+统一教学数据包把本章各环节连成一条可复核数据链：`sample_metadata.csv`与`raw_counts.csv`说明输入，`normalized_top500_variable_genes.csv`连接高维图表，`differential_expression_results.csv`连接效应量和FDR，`enrichment_results.csv`连接基因集统计，`provenance.md`和`validation_report.md`记录生成规则。
+
+差异表达教师参考流程固定为`~ cell + dex`，比较`trt`相对`untrt`，先保留总计数大于1的基因。结果表中的log2 fold change、P值和BH FDR均由DESeq2计算；课程筛选规则为`FDR < 0.05`且`|log2FC| >= 1`。学生仍需检查对比方向、细胞系配对、缺失FDR和完整结果保留。
+
+GO Biological Process富集按上调和下调分别计算。背景为差异分析中具有P值且能映射symbol的受检基因，使用超几何检验和BH校正。富集表示输入基因集合在已有注释集合中过度代表，不说明通路已被激活，也不证明某基因直接调控另一个基因。
+
+AI可生成结果筛选、火山图、热图或摘要草稿。人工验收至少核对五项：输入文件哈希、样本列顺序、设计公式、阈值与对比方向、摘要是否把统计关联越级写成机制或临床结论。
