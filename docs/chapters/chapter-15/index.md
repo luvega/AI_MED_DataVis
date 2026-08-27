@@ -149,7 +149,7 @@ design <- model.matrix(~ factor(pool) + factor(tomato), y.ab$samples)
 
 | 案例 | 来源与关键单元 | SHA-256 | 来源环境与边界 |
 | --- | --- | --- | --- |
-| 三批次整合 | `14_cellular_structure_integration/notebook.ipynb`；22、44—84、110—123 | `C1D0C8A4B72E3EE7C07B60DD19FC26CF4838C5C91D5A521723A53B43970C2F2D` | Python 3.11.14；Scanpy 1.11.5、scVI-tools 1.4.1、scIB 1.1.7、BBKNN 1.6.0 |
+| 三批次整合 | `14_cellular_structure_integration/notebook.ipynb`；22、44-84、110-123 | `C1D0C8A4B72E3EE7C07B60DD19FC26CF4838C5C91D5A521723A53B43970C2F2D` | Python 3.11.14；Scanpy 1.11.5、scVI-tools 1.4.1、scIB 1.1.7、BBKNN 1.6.0 |
 | WT chimera 丰度 | `osca.multisample-differential-abundance.md`；细胞类型×样本计数与 edgeR 代码块 | `6667A77B7269475B6A9A853F724BED9F327E83FAEDCF8813F755E800B458EEA6` | 页面未保存完整 R 会话版本，标记`需补证据`；推断单位按 6 个样本审阅 |
 
 ## 15.2 轨迹分析、RNA velocity 与细胞通讯
@@ -274,7 +274,7 @@ NicheNet 增加配体到靶基因的先验网络，并依据受体细胞中的�
 | --- | --- | --- | --- |
 | DPT 与 Palantir | `15_trajectories_pseudotemporal/notebook.ipynb`；27、30、32 | `6D00CA51F178610528EFE1CB37ECD909CC552BC17954399BD84086563E8BAEC6` | Scanpy 1.11.5、LaminDB 2.0.1；Python 版本`需补证据` |
 | RNA velocity | `16_trajectories_rna_velocity/notebook.ipynb`；22、33、35、42 | `E95C14FBE05D705FDF8F141CC91A6A59721254FEAC2BD9E57F9A9B7618C83D99` | Scanpy 1.11.5、scVelo 0.3.3、LaminDB 2.1.2；Python 版本`需补证据` |
-| 细胞通讯 | `23_mechanisms_cell_cell_communication/notebook.ipynb`；14、27—46、55—91、102 | `DE971F0B849EFB505898B73EE9FDAD550DDB386161BA6C7F320B3A988A92CCEB` | Python 3.10.8、Scanpy 1.7.2、LIANA 0.1.6、decoupler 1.3.3；NicheNet 的 R 包版本`需补证据` |
+| 细胞通讯 | `23_mechanisms_cell_cell_communication/notebook.ipynb`；14、27-46、55-91、102 | `DE971F0B849EFB505898B73EE9FDAD550DDB386161BA6C7F320B3A988A92CCEB` | Python 3.10.8、Scanpy 1.7.2、LIANA 0.1.6、decoupler 1.3.3；NicheNet 的 R 包版本`需补证据` |
 
 这些环境记录解释了来源图的运行条件。它们不能替代本机对象、日志和输出；也不能据此推测未记录包的版本。
 
@@ -692,7 +692,7 @@ moran = sq.gr.spatial_autocorr(
 | --- | --- | --- | --- |
 | 对象与空间坐标 | 本机复跑 | 2,688 个 spot、18,078 个基因、15 个 cluster；坐标为 2,688×2 | 对象满足单切片空间描述的结构要求 |
 | 邻接图 | 本机复跑 | `n_rings=1` 和 2 的非零连边数为 15,580 和 45,944 | 圈数改变扩大了每个 spot 的邻域 |
-| Hippocampus–Pyramidal_layer | 本机复跑 | Z 分数从 25.424 变为 52.177 | 该组合在两种邻接口径下均为正富集 |
+| Hippocampus-Pyramidal_layer | 本机复跑 | Z 分数从 25.424 变为 52.177 | 该组合在两种邻接口径下均为正富集 |
 | Nrgn / Ttr | 本机复跑 | Moran’s I 为 0.875 / 0.842，置换 `p_sim` 均为 0.000999 | 两个基因在当前图上呈强正空间自相关 |
 | 富集矩阵敏感性 | 本机复跑 | 完整矩阵在两种圈数下的 Spearman 相关系数为 0.991 | 整体排序较稳定，局部幅度仍会变化 |
 
@@ -753,12 +753,12 @@ AI 可以把任务拆成脚本、解释报错、检查缺失字段和生成核�
 | 2 | 数据：scverse 小鼠脑单切片，2,688 spot×18,078 gene；列出来源、字节数与 SHA-256 | 数据文件能否被独立追溯 |
 | 3 | 对象：`.X`、`cluster`、`obsm["spatial"]` 与单一 library key；分析单位是 spot | 为什么不能把 2,688 个 spot 当成样本重复 |
 | 4 | 方法：`n_rings=1`、1,000 次标签置换、seed 20260716，并对 Nrgn/Ttr 计算 Moran’s I | 邻接规则、置换口径和随机性如何记录 |
-| 5 | 主结果：Hippocampus–Pyramidal_layer 的 Z=25.424；Nrgn/Ttr 的 I=0.875/0.842 | 这些数值允许哪一层空间解释 |
+| 5 | 主结果：Hippocampus-Pyramidal_layer 的 Z=25.424；Nrgn/Ttr 的 I=0.875/0.842 | 这些数值允许哪一层空间解释 |
 | 6 | 敏感性：`n_rings=1` 与 2 的连边数为 15,580/45,944，富集矩阵 Spearman 相关系数为 0.991 | 整体排序稳定是否等于局部数值不变 |
 | 7 | 限制：单切片无独立重复；结果依赖邻接参数与 cluster 注释；跨版本数值可能有差异 | 哪些结论需多切片和独立环境复核 |
 | 8 | 结论与交付：得到可追溯的候选邻域和空间自相关结果；附数据清单、脚本、环境锁、结果表和图 | 他人能否重新运行并找到同一证据边界 |
 
-第5页的结论可写：“在当前单切片、cluster 注释和邻接规则下，Hippocampus–Pyramidal_layer 呈正邻域富集，Nrgn 与 Ttr 呈强正空间自相关。”第8页不能改成“发现细胞通讯网络”或“阐明脑区形成机制”。
+第5页的结论可写：“在当前单切片、cluster 注释和邻接规则下，Hippocampus-Pyramidal_layer 呈正邻域富集，Nrgn 与 Ttr 呈强正空间自相关。”第8页不能改成“发现细胞通讯网络”或“阐明脑区形成机制”。
 
 ### 15.6.2 代码复核练习一：识别不可复现路径
 
