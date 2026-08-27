@@ -81,17 +81,14 @@ class OutlineValidationTests(unittest.TestCase):
                     with self.assertRaises(SystemExit):
                         validate_site_sources.validate_no_restricted_or_sensitive_content()
 
-    def test_accepts_18_week_36_hour_course_plan(self) -> None:
+    def test_rejects_teacher_only_support_page(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
             docs_root = repo_root / "docs"
-            syllabus = docs_root / "teaching" / "36-hour-syllabus.md"
-            syllabus.parent.mkdir(parents=True)
-            syllabus.write_text(
-                "\n".join(
-                    f"| 第{week}周，2学时 | 主题 | 内容 | AI任务 | 重点 | 难点 | 产物 |"
-                    for week in range(1, 19)
-                ),
+            teacher_plan = docs_root / "teaching" / "18-week-teacher-plan.md"
+            teacher_plan.parent.mkdir(parents=True)
+            teacher_plan.write_text(
+                "# 教师教案\n",
                 encoding="utf-8",
             )
 
@@ -99,7 +96,9 @@ class OutlineValidationTests(unittest.TestCase):
                 patch.object(validate_site_sources, "REPO_ROOT", repo_root),
                 patch.object(validate_site_sources, "DOCS_ROOT", docs_root),
             ):
-                validate_site_sources.validate_unified_course_plan()
+                with contextlib.redirect_stderr(io.StringIO()):
+                    with self.assertRaises(SystemExit):
+                        validate_site_sources.validate_no_teacher_only_support_files()
 
 
 if __name__ == "__main__":

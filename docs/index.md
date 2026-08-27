@@ -56,17 +56,13 @@ AI 工具在本书中是协作对象，不是结论来源。学生可以让 AI �
 | 第14章 单细胞转录组数据处理与可视化 | [进入正文](chapters/chapter-14/index.md) |
 | 第15章 单细胞进阶、空间组学与综合项目 | [进入正文](chapters/chapter-15/index.md) |
 
-## 备课与参考规范
+## 学生学习资源与参考规范
 
 | 材料 | 页面 |
 | --- | --- |
-| 36课时统一课程计划 | [查看](teaching/36-hour-syllabus.md) |
 | 18周学生学习地图 | [查看](teaching/36-hour-learning-map.md) |
-| 18周教师教案 | [查看](teaching/18-week-teacher-plan.md) |
 | 统一综合项目模板 | [查看](teaching/unified-project-template.md) |
 | 第1章课堂任务单 | [查看](teaching/chapter-1-task-sheet.md) |
-| 第6章使用材料清单 | [查看](teaching/chapter-6-material-list.md) |
-| 第6章材料护照 | [查看](teaching/chapter-6-material-passport.md) |
 | 术语表 | [查看](references/terminology.md) |
 | 图表规范 | [查看](references/figure-guidelines.md) |
 | 提示词样例 | [查看](references/prompt-examples.md) |

@@ -39,13 +39,9 @@ PARTS = [
 ]
 
 TEACHING_FILES = {
-    "syllabus/36课时-统一融合修订版.md": "teaching/36-hour-syllabus.md",
     "syllabus/36课时-学生学习地图.md": "teaching/36-hour-learning-map.md",
-    "outputs/2026-08-21-NGS00移交包归档与课程融合更新/2026-08-21-18周教师教案.md": "teaching/18-week-teacher-plan.md",
     "outputs/2026-08-21-NGS00移交包归档与课程融合更新/2026-08-21-统一综合项目模板.md": "teaching/unified-project-template.md",
     "outputs/2026-06-06-第一章正文生成/2026-06-06-第1章-课堂任务单.md": "teaching/chapter-1-task-sheet.md",
-    "chapters/chapter-6/第6章-使用材料清单.md": "teaching/chapter-6-material-list.md",
-    "chapters/chapter-6/第6章-材料护照.md": "teaching/chapter-6-material-passport.md",
 }
 
 UNIFIED_SYLLABUS = SOURCE_ROOT / "syllabus" / "36课时-统一融合修订版.md"
@@ -70,6 +66,10 @@ def write_text(path: Path, content: str) -> None:
 def copy_file(source: Path, target: Path) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, target)
+
+
+def student_facing_support_content(content: str) -> str:
+    return re.split(r"^## 教师提示\s*$", content, maxsplit=1, flags=re.MULTILINE)[0].rstrip() + "\n"
 
 
 def materialize_external_images(body: Path, target_dir: Path, content: str) -> str:
@@ -148,7 +148,9 @@ def copy_chapters() -> None:
 
 def copy_support_files() -> None:
     for source_relative, target_relative in TEACHING_FILES.items():
-        copy_file(SOURCE_ROOT / source_relative, DOCS_ROOT / target_relative)
+        source = SOURCE_ROOT / source_relative
+        target = DOCS_ROOT / target_relative
+        write_text(target, student_facing_support_content(read_text(source)))
     for source_relative, target_relative in REFERENCE_FILES.items():
         copy_file(SOURCE_ROOT / source_relative, DOCS_ROOT / target_relative)
 
@@ -190,17 +192,13 @@ AI 工具在本书中是协作对象，不是结论来源。学生可以让 AI �
 ## 教材目录
 
 {chapter_links()}
-## 备课与参考规范
+## 学生学习资源与参考规范
 
 | 材料 | 页面 |
 | --- | --- |
-| 36课时统一课程计划 | [查看](teaching/36-hour-syllabus.md) |
 | 18周学生学习地图 | [查看](teaching/36-hour-learning-map.md) |
-| 18周教师教案 | [查看](teaching/18-week-teacher-plan.md) |
 | 统一综合项目模板 | [查看](teaching/unified-project-template.md) |
 | 第1章课堂任务单 | [查看](teaching/chapter-1-task-sheet.md) |
-| 第6章使用材料清单 | [查看](teaching/chapter-6-material-list.md) |
-| 第6章材料护照 | [查看](teaching/chapter-6-material-passport.md) |
 | 术语表 | [查看](references/terminology.md) |
 | 图表规范 | [查看](references/figure-guidelines.md) |
 | 提示词样例 | [查看](references/prompt-examples.md) |

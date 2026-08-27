@@ -104,8 +104,31 @@ class CopyChaptersTests(unittest.TestCase):
         self.assertIn("airway", homepage)
         self.assertIn("数据主线", homepage)
         self.assertIn("AI主线", homepage)
+        self.assertIn("学生学习资源", homepage)
+        self.assertIn("18周学生学习地图", homepage)
+        self.assertIn("统一综合项目模板", homepage)
+        for teacher_only_label in ("课程计划", "教师教案", "材料清单", "材料护照"):
+            self.assertNotIn(teacher_only_label, homepage)
         for term in generate_site.FORBIDDEN_LEGACY_TERMS:
             self.assertNotIn(term, homepage)
+
+    def test_only_student_facing_teaching_files_are_generated(self) -> None:
+        targets = set(generate_site.TEACHING_FILES.values())
+        self.assertEqual(
+            targets,
+            {
+                "teaching/36-hour-learning-map.md",
+                "teaching/unified-project-template.md",
+                "teaching/chapter-1-task-sheet.md",
+            },
+        )
+
+    def test_teacher_tip_section_is_removed_from_public_support_content(self) -> None:
+        content = "# 学生任务\n\n## 提交要求\n\n提交作业。\n\n## 教师提示\n\n批改说明。\n"
+        public_content = generate_site.student_facing_support_content(content)
+        self.assertIn("## 提交要求", public_content)
+        self.assertNotIn("教师提示", public_content)
+        self.assertNotIn("批改说明", public_content)
 
 if __name__ == "__main__":
     unittest.main()

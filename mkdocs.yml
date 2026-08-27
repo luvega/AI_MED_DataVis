@@ -80,14 +80,10 @@ nav:
   - 第五篇 单细胞、空间组学与综合项目:
       - 第14章 单细胞转录组数据处理与可视化: chapters/chapter-14/index.md
       - 第15章 单细胞进阶、空间组学与综合项目: chapters/chapter-15/index.md
-  - 教学支持:
-      - 36课时统一课程计划: teaching/36-hour-syllabus.md
+  - 学生学习资源:
       - 18周学生学习地图: teaching/36-hour-learning-map.md
-      - 18周教师教案: teaching/18-week-teacher-plan.md
       - 统一综合项目模板: teaching/unified-project-template.md
       - 第1章课堂任务单: teaching/chapter-1-task-sheet.md
-      - 第6章使用材料清单: teaching/chapter-6-material-list.md
-      - 第6章材料护照: teaching/chapter-6-material-passport.md
   - 参考规范:
       - 术语表: references/terminology.md
       - 图表规范: references/figure-guidelines.md

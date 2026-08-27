@@ -16,6 +16,12 @@ CHAPTER_RANGE = range(1, 16)
 IMAGE_PATTERN = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 FORBIDDEN_LEGACY_TERMS = ("拓展线", "双轨项目", "NGS拓展", "表格项目", "NGS项目")
 FORBIDDEN_PUBLIC_SUFFIXES = {".zip", ".log"}
+FORBIDDEN_TEACHER_PAGES = {
+    "36-hour-syllabus.md",
+    "18-week-teacher-plan.md",
+    "chapter-6-material-list.md",
+    "chapter-6-material-passport.md",
+}
 SENSITIVE_PATTERNS = {
     "private IPv4 address": re.compile(
         r"\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})\b"
@@ -147,13 +153,9 @@ def validate_no_outline_pages() -> None:
 
 def validate_required_support_files() -> None:
     required = [
-        DOCS_ROOT / "teaching" / "36-hour-syllabus.md",
         DOCS_ROOT / "teaching" / "36-hour-learning-map.md",
-        DOCS_ROOT / "teaching" / "18-week-teacher-plan.md",
         DOCS_ROOT / "teaching" / "unified-project-template.md",
         DOCS_ROOT / "teaching" / "chapter-1-task-sheet.md",
-        DOCS_ROOT / "teaching" / "chapter-6-material-list.md",
-        DOCS_ROOT / "teaching" / "chapter-6-material-passport.md",
         DOCS_ROOT / "references" / "terminology.md",
         DOCS_ROOT / "references" / "figure-guidelines.md",
         DOCS_ROOT / "references" / "prompt-examples.md",
@@ -163,14 +165,15 @@ def validate_required_support_files() -> None:
             fail(f"missing support file: {path.relative_to(REPO_ROOT)}")
 
 
-def validate_unified_course_plan() -> None:
-    syllabus_path = DOCS_ROOT / "teaching" / "36-hour-syllabus.md"
-    syllabus = read_text(syllabus_path)
-    week_rows = re.findall(r"^\| 第(\d+)周，(\d+)学时 \|", syllabus, flags=re.MULTILINE)
-    weeks = [int(week) for week, _ in week_rows]
-    hours = [int(hour) for _, hour in week_rows]
-    if weeks != list(range(1, 19)) or sum(hours) != 36:
-        fail(f"course plan must contain one 18-week, 36-hour route: weeks={weeks}, hours={sum(hours)}")
+def validate_no_teacher_only_support_files() -> None:
+    teaching_root = DOCS_ROOT / "teaching"
+    existing = sorted(
+        path.name
+        for path in teaching_root.glob("*.md")
+        if path.name in FORBIDDEN_TEACHER_PAGES
+    )
+    if existing:
+        fail(f"teacher-only support pages must not be published: {existing}")
 
 
 def validate_no_restricted_or_sensitive_content() -> None:
@@ -206,7 +209,7 @@ def main() -> None:
     validate_no_raw_reference_dir()
     validate_no_outline_pages()
     validate_required_support_files()
-    validate_unified_course_plan()
+    validate_no_teacher_only_support_files()
     validate_no_restricted_or_sensitive_content()
     print("Site source validation passed.")
 
