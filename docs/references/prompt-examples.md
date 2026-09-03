@@ -10,7 +10,6 @@
 | 参考资料 | `参考资料/Starting_Data_Analytics_with_Generative_AI_and_Python_362.md` |
 | 参考资料 | `参考资料/ai_lingnan_book_2026-06-05/markdown/chapters/chapter-5/section-5-2.md` |
 | 参考资料 | `参考资料/ai_lingnan_book_2026-06-05/markdown/chapters/chapter-18/section-18-3.md` |
-| 教学设计规范 | `academic-presentation-teaching` |
 | 证据规范 | `academic-research-suite`与`biomedical-research-framework` |
 
 ## 提示词使用规则
@@ -32,17 +31,20 @@
 上下文：
 - 课程章节：
 - 学生背景：
+- WorkBuddy 工作空间：
 - 数据字段：
 - 已有代码或图表：
 - 必读规则：
 
 约束：
 - 不改动原始数据。
+- 使用默认权限；敏感路径、删除、脚本命令、网络或其他高风险操作需要人工确认。
 - 不新增医学事实、样本量、P 值或文献结论。
 - 不能确认时写“需人工确认”。
 - 输出要适合药学本科生和研究生入门学习。
 
 验证：
+- 核对 WorkBuddy 结果区中的产物、工作空间文件和变更。
 - 说明如何检查代码能否运行。
 - 说明统计前提、变量类型和图表编码。
 - 指出结论是否超过数据支持范围。
@@ -50,7 +52,7 @@
 输出：
 - 按指定表格或小节输出。
 - 给出核验清单。
-- 如果涉及文件，说明建议保存路径。
+- 如果涉及文件，说明保存路径，并核对文件确已写入该位置。
 ```
 
 必查项：
