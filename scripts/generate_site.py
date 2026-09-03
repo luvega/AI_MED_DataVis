@@ -53,6 +53,16 @@ REFERENCE_FILES = {
     "references/提示词样例.md": "references/prompt-examples.md",
 }
 
+HOMEPAGE_COVER_SOURCE = (
+    SOURCE_ROOT
+    / "assets"
+    / "homepage"
+    / "medical-data-visualization-homepage-cover-imagegen.png"
+)
+HOMEPAGE_COVER_TARGET = (
+    DOCS_ROOT / "assets" / "images" / "medical-data-visualization-homepage-cover-imagegen.png"
+)
+
 
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
@@ -155,6 +165,12 @@ def copy_support_files() -> None:
         copy_file(SOURCE_ROOT / source_relative, DOCS_ROOT / target_relative)
 
 
+def copy_homepage_cover() -> None:
+    if not HOMEPAGE_COVER_SOURCE.is_file():
+        raise FileNotFoundError(f"homepage cover not found: {HOMEPAGE_COVER_SOURCE}")
+    copy_file(HOMEPAGE_COVER_SOURCE, HOMEPAGE_COVER_TARGET)
+
+
 def chapter_links() -> str:
     lines: list[str] = []
     for part_title, chapter_numbers in PARTS:
@@ -180,6 +196,11 @@ def build_homepage() -> str:
 本书面向药学本科生和研究生，不要求预先具备高级统计、生物信息学或编程基础。WorkBuddy 是课程统一使用的前台入口，用于组织工作空间、任务上下文、执行过程和结果核验。Python、R、Git、Miniconda、Node.js 和 Pandoc 根据具体任务调用。
 
 [从第1章开始](chapters/chapter-1/index.md) · [先配置 WorkBuddy 工作空间](chapters/chapter-2/index.md) · [查看18周学习地图](teaching/36-hour-learning-map.md)
+
+<figure class="homepage-cover">
+  <img src="assets/images/medical-data-visualization-homepage-cover-imagegen.png" alt="医药数据从问题定义、数据对象和分析图表走向人工核验与证据包的课程封面图" width="1672" height="941" fetchpriority="high">
+  <figcaption>从医药问题、数据对象和分析图表，到人工核验与可复现证据包。</figcaption>
+</figure>
 
 ## 这本书帮助你完成什么
 
@@ -315,6 +336,7 @@ def main() -> None:
     remove_generated_dirs()
     copy_chapters()
     copy_support_files()
+    copy_homepage_cover()
     write_text(DOCS_ROOT / "index.md", build_homepage())
     print(f"Generated MkDocs content from {SOURCE_ROOT} into {DOCS_ROOT}")
 

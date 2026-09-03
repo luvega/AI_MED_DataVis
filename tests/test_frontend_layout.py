@@ -36,6 +36,13 @@ class FrontendLayoutTests(unittest.TestCase):
         self.assertTrue(all(palette["primary"] == "teal" for palette in palettes))
         self.assertTrue(all(palette["accent"] == "teal" for palette in palettes))
 
+    def test_homepage_cover_has_bounded_responsive_layout(self) -> None:
+        css = CSS_PATH.read_text(encoding="utf-8")
+        self.assertIn(".md-typeset .homepage-cover", css)
+        self.assertIn("max-width: 72rem", css)
+        self.assertIn("aspect-ratio: 1672 / 941", css)
+        self.assertIn("object-fit: cover", css)
+
     def test_public_markdown_contains_no_em_dash_characters(self) -> None:
         offenders = []
         for path in DOCS_ROOT.rglob("*.md"):

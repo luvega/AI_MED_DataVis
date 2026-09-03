@@ -199,6 +199,26 @@ body {
   max-width: 100%;
 }
 
+.md-typeset .homepage-cover {
+  margin: 1.8rem 0 2.6rem;
+  max-width: 72rem;
+}
+
+.md-typeset .homepage-cover img {
+  aspect-ratio: 1672 / 941;
+  display: block;
+  object-fit: cover;
+  width: 100%;
+}
+
+.md-typeset .homepage-cover figcaption {
+  color: var(--book-muted);
+  font-size: 0.7rem;
+  line-height: 1.55;
+  margin-top: 0.65rem;
+  max-width: 62rem;
+}
+
 .md-typeset .mermaid {
   background: var(--book-surface-raised);
   border: 1px solid var(--book-border);
@@ -285,6 +305,10 @@ body {
   .md-content__inner {
     margin-left: 0.85rem;
     margin-right: 0.85rem;
+  }
+
+  .md-typeset .homepage-cover {
+    margin: 1.35rem 0 2rem;
   }
 }
 

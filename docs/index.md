@@ -6,6 +6,11 @@
 
 [从第1章开始](chapters/chapter-1/index.md) · [先配置 WorkBuddy 工作空间](chapters/chapter-2/index.md) · [查看18周学习地图](teaching/36-hour-learning-map.md)
 
+<figure class="homepage-cover">
+  <img src="assets/images/medical-data-visualization-homepage-cover-imagegen.png" alt="医药数据从问题定义、数据对象和分析图表走向人工核验与证据包的课程封面图" width="1672" height="941" fetchpriority="high">
+  <figcaption>从医药问题、数据对象和分析图表，到人工核验与可复现证据包。</figcaption>
+</figure>
+
 ## 这本书帮助你完成什么
 
 | 面对的问题 | 需要形成的能力 | 可检查的产物 |

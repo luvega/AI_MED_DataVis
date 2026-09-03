@@ -110,12 +110,34 @@ class CopyChaptersTests(unittest.TestCase):
         self.assertIn("学生学习资源", homepage)
         self.assertIn("18周学生学习地图", homepage)
         self.assertIn("统一综合项目模板", homepage)
+        self.assertIn("homepage-cover", homepage)
+        self.assertIn(
+            "assets/images/medical-data-visualization-homepage-cover-imagegen.png",
+            homepage,
+        )
+        self.assertIn('width="1672" height="941" fetchpriority="high"', homepage)
         self.assertNotIn("它不把学生预设为程序员", homepage)
         self.assertNotIn("教学原则", homepage)
         for teacher_only_label in ("课程计划", "教师教案", "材料清单", "材料护照"):
             self.assertNotIn(teacher_only_label, homepage)
         for term in generate_site.FORBIDDEN_LEGACY_TERMS:
             self.assertNotIn(term, homepage)
+
+    def test_copies_homepage_cover_from_book_source(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "book" / "assets" / "homepage" / "cover.png"
+            target = root / "site" / "docs" / "assets" / "images" / "cover.png"
+            source.parent.mkdir(parents=True)
+            source.write_bytes(b"cover-bytes")
+
+            with (
+                patch.object(generate_site, "HOMEPAGE_COVER_SOURCE", source),
+                patch.object(generate_site, "HOMEPAGE_COVER_TARGET", target),
+            ):
+                generate_site.copy_homepage_cover()
+
+            self.assertEqual(target.read_bytes(), b"cover-bytes")
 
     def test_only_student_facing_teaching_files_are_generated(self) -> None:
         targets = set(generate_site.TEACHING_FILES.values())
