@@ -99,14 +99,19 @@ class CopyChaptersTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     generate_site.verify_unified_syllabus()
 
-    def test_homepage_uses_one_ai_airway_course_route(self) -> None:
+    def test_homepage_uses_workbuddy_task_and_airway_course_route(self) -> None:
         homepage = generate_site.build_homepage()
+        self.assertIn("WorkBuddy", homepage)
+        self.assertIn("每章完成一件可检查的事", homepage)
+        self.assertIn("从问题到证据包", homepage)
         self.assertIn("airway", homepage)
         self.assertIn("数据主线", homepage)
-        self.assertIn("AI主线", homepage)
+        self.assertIn("AI 主线", homepage)
         self.assertIn("学生学习资源", homepage)
         self.assertIn("18周学生学习地图", homepage)
         self.assertIn("统一综合项目模板", homepage)
+        self.assertNotIn("它不把学生预设为程序员", homepage)
+        self.assertNotIn("教学原则", homepage)
         for teacher_only_label in ("课程计划", "教师教案", "材料清单", "材料护照"):
             self.assertNotIn(teacher_only_label, homepage)
         for term in generate_site.FORBIDDEN_LEGACY_TERMS:
