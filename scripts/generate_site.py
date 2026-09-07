@@ -41,7 +41,7 @@ PARTS = [
 TEACHING_FILES = {
     "syllabus/36课时-学生学习地图.md": "teaching/36-hour-learning-map.md",
     "outputs/2026-08-21-NGS00移交包归档与课程融合更新/2026-08-21-统一综合项目模板.md": "teaching/unified-project-template.md",
-    "outputs/2026-06-06-第一章正文生成/2026-06-06-第1章-课堂任务单.md": "teaching/chapter-1-task-sheet.md",
+    "outputs/2026-09-07-第一章自主阅读版更新/2026-09-07-第1章-课堂任务单.md": "teaching/chapter-1-task-sheet.md",
 }
 
 UNIFIED_SYLLABUS = SOURCE_ROOT / "syllabus" / "36课时-统一融合修订版.md"
