@@ -1,0 +1,22 @@
+Package: medicaldatacourse
+Type: Project
+Title: Medical Data Processing and Visualization Course Environment
+Version: 2026.9.7
+Authors@R: person("Course", "Team", role = c("aut", "cre"), email = "course@example.invalid")
+Description: Declares the R packages used by the core teaching path. This is
+    an environment manifest, not an installable teaching package.
+License: file LICENSE
+Encoding: UTF-8
+Imports:
+    airway,
+    BiocManager,
+    DESeq2,
+    dplyr,
+    ggplot2,
+    glmnet,
+    pheatmap,
+    randomForest,
+    readxl,
+    renv,
+    survival,
+    tidyr

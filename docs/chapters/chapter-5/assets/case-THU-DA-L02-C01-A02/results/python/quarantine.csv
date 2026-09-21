@@ -1,0 +1,5 @@
+record_id,participant_id,round,estimate,unit,reason
+r04,u04,1,,粒,missing_estimate
+r05,u05,1,-30,粒,negative_estimate
+r08,u08,1,900,盒,unknown_unit
+r13,u11,1,大约900,粒,non_numeric

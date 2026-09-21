@@ -1,0 +1,10 @@
+record_id,participant_id,round,estimate_grains,review_high
+r01,u01,1,800,FALSE
+r02,u02,1,950,FALSE
+r03,u03,1,1200,FALSE
+r06,u06,1,12000,TRUE
+r07,u07,1,1000,FALSE
+r09,u09,1,0,FALSE
+r10,u10,1,1100,FALSE
+r11,u01,2,980,FALSE
+r12,u02,2,1050,FALSE

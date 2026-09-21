@@ -34,7 +34,10 @@ SENSITIVE_PATTERNS = {
 
 
 def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8")
+    # This teaching fixture deliberately demonstrates a non-UTF-8 CSV.
+    encoding_fixture = DOCS_ROOT / "chapters/chapter-5/assets/case-THU-DA-L02-C01-A02/data/guesses_gb18030.csv"
+    encoding = "gb18030" if path.resolve() == encoding_fixture.resolve() else "utf-8"
+    return path.read_text(encoding=encoding)
 
 
 def fail(message: str) -> None:

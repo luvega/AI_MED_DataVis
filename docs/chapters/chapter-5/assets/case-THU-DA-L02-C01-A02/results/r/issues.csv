@@ -1,0 +1,7 @@
+"source_row","record_id","issue","action"
+11,"r10","duplicate_export","drop_duplicate_copy"
+4,"r04","missing_estimate","quarantine"
+5,"r05","negative_estimate","quarantine"
+6,"r06","high_review","retain_flag"
+8,"r08","unknown_unit","quarantine"
+14,"r13","non_numeric","quarantine"

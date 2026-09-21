@@ -11,6 +11,23 @@ from scripts import validate_site_sources
 
 
 class OutlineValidationTests(unittest.TestCase):
+    def test_scans_gb18030_teaching_fixture(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            docs_root = repo_root / "docs"
+            fixture = docs_root / "chapters/chapter-5/assets/case-THU-DA-L02-C01-A02/data/guesses_gb18030.csv"
+            fixture.parent.mkdir(parents=True)
+            with (
+                patch.object(validate_site_sources, "REPO_ROOT", repo_root),
+                patch.object(validate_site_sources, "DOCS_ROOT", docs_root),
+            ):
+                fixture.write_text("编号,估计\n甲,100\n", encoding="gb18030")
+                validate_site_sources.validate_no_restricted_or_sensitive_content()
+                fixture.write_text("地址\n192.168.1.23\n", encoding="gb18030")
+                with contextlib.redirect_stderr(io.StringIO()):
+                    with self.assertRaises(SystemExit):
+                        validate_site_sources.validate_no_restricted_or_sensitive_content()
+
     def test_rejects_directory_form_book_outline(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
