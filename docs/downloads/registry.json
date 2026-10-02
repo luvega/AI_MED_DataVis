@@ -128,6 +128,45 @@
         "scripts/01_evaluation.py",
         "scripts/02_evaluation.R"
       ]
+    },
+    {
+      "chapter": 11,
+      "title": "高维矩阵、PCA、聚类与热图",
+      "version": "2026-10-02",
+      "file": "chapter-11-practice.zip",
+      "sha256": "6c3c6461a8c99daaa8448ce8703be671cc2b239a3b0a14556dcce0ba14cace0e",
+      "size": 887101,
+      "entrypoints": [
+        "scripts/01_matrix.py",
+        "scripts/02_nci60.py",
+        "scripts/03_matrix.R"
+      ]
+    },
+    {
+      "chapter": 12,
+      "title": "RNA-seq 数据链条与差异表达分析",
+      "version": "2026-10-02",
+      "file": "chapter-12-practice.zip",
+      "sha256": "025b5f3478ae332cdb157ae448e9253d6287f8dfbdbf7e53beaf7d9a047cf6c8",
+      "size": 2005627,
+      "entrypoints": [
+        "scripts/01_audit_inputs.py",
+        "scripts/02_review_results.py",
+        "scripts/03_deseq2.R",
+        "scripts/04_review_enrichment.py"
+      ]
+    },
+    {
+      "chapter": 13,
+      "title": "公共数据库、序列数据与医药大数据智能分析",
+      "version": "2026-10-02",
+      "file": "chapter-13-practice.zip",
+      "sha256": "1fa388e24df33888568b6cb11c64673f61fe47d59fbd6e95daaa71a4d96c259b",
+      "size": 9733,
+      "entrypoints": [
+        "scripts/01_check_sequences.py",
+        "scripts/02_map_ids.py"
+      ]
     }
   ]
 }

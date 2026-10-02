@@ -2,7 +2,7 @@
 
 下载对应章节的ZIP，解压后先读 `README.md`。输入保存在 `data/`，运行结果写入 `outputs/`。每个包的 `manifest.json` 列出版本、运行入口、编码与文件校验值。
 
-已发布 10 / 15 章；正文与练习包按批同步更新。
+已发布 13 / 15 章；正文与练习包按批同步更新。
 
 | 章节 | 练习包 | 版本 | 大小 |
 | --- | --- | --- | --- |
@@ -16,9 +16,9 @@
 | [第8章 统计推断与组间比较](../chapters/chapter-8/index.md) | [下载ZIP](../downloads/chapter-08-practice.zip) | 2026-10-02 | 16 KB |
 | [第9章 相关、回归与分类模型](../chapters/chapter-9/index.md) | [下载ZIP](../downloads/chapter-09-practice.zip) | 2026-10-02 | 11 KB |
 | [第10章 模型评估、特征选择与可解释性](../chapters/chapter-10/index.md) | [下载ZIP](../downloads/chapter-10-practice.zip) | 2026-10-02 | 25 KB |
-| [第11章 高维矩阵、PCA、聚类与热图](../chapters/chapter-11/index.md) | 本批尚未发布 | 待发布 | 待发布 |
-| [第12章 RNA-seq 数据链条与差异表达分析](../chapters/chapter-12/index.md) | 本批尚未发布 | 待发布 | 待发布 |
-| [第13章 公共数据库、序列数据与医药大数据智能分析](../chapters/chapter-13/index.md) | 本批尚未发布 | 待发布 | 待发布 |
+| [第11章 高维矩阵、PCA、聚类与热图](../chapters/chapter-11/index.md) | [下载ZIP](../downloads/chapter-11-practice.zip) | 2026-10-02 | 866 KB |
+| [第12章 RNA-seq 数据链条与差异表达分析](../chapters/chapter-12/index.md) | [下载ZIP](../downloads/chapter-12-practice.zip) | 2026-10-02 | 1959 KB |
+| [第13章 公共数据库、序列数据与医药大数据智能分析](../chapters/chapter-13/index.md) | [下载ZIP](../downloads/chapter-13-practice.zip) | 2026-10-02 | 10 KB |
 | [第14章 单细胞转录组数据处理与可视化](../chapters/chapter-14/index.md) | 本批尚未发布 | 待发布 | 待发布 |
 | [第15章 单细胞进阶、空间组学与综合项目](../chapters/chapter-15/index.md) | 本批尚未发布 | 待发布 | 待发布 |
 
@@ -211,3 +211,75 @@ Rscript scripts/02_evaluation.R
 脚本按自身位置查找输入，可从其他目录调用。所有新结果写入outputs；data/raw保留原输入。先预测关键结果，再运行核对，最后按exercises.md修改一个条件。文件名出现中文时保留UTF-8；CSV输入编码见bundle.json。独立练习没有附完整答案。
 
 正文中的短代码用于逐步讲解，scripts中的文件给出完整演示。记录数据、参数和实际输出，使用records.md整理自己的运行过程。
+
+<a id="chapter-11"></a>
+
+## 第11章开始说明
+
+# 第11章 高维矩阵、PCA、聚类与热图练习包
+
+本包对应11.1、11.6。先运行8×6教学矩阵，观察F6量级、标准化、距离与聚类如何改变结果，再读取NCI60的64×6830真实细胞系表达矩阵。全部输入在本地，不需要安装ISLP或ISLR来下载数据。
+
+```text
+python scripts/01_matrix.py
+python scripts/02_nci60.py
+Rscript scripts/03_matrix.R
+```
+
+Python需要numpy、pandas、scipy、scikit-learn、matplotlib、seaborn；R演示只需随附包。先安装环境再上课。脚本按文件位置寻找data/raw，结果统一写入outputs。预测小矩阵的主变化方向，运行并核对PVE、成员关系和载荷，再按exercises.md只改变一个条件。
+
+数据说明见data_dictionary.md，来源及许可见sources.md。scripts/01_matrix.py保存原教学构造规则，并读取固定CSV输入；运行不会修改原数据。保留实际软件版本和输出，PCA符号及k-means成员差异按正文解释。
+
+<a id="chapter-12"></a>
+
+## 第12章开始说明
+
+# 第12章学生练习：airway 的输入、建模与结果审阅
+
+从本章正文的样本表进入，先核对计数列与元数据，再选择原生 R 建模或离线结果审阅。两条路线使用同一研究比较，输出状态分别记录。数据为公开 airway 软件包的完整计数与样本信息，含63,677个基因、8个样本、4个细胞系，每个细胞系有trt/untrt配对。`airway_reference_results.tsv` 是2026-07-10既有DESeq2运行结果，不是本次脚本新计算结果。
+
+在解压后的 practice 目录运行：
+
+```powershell
+python scripts/01_audit_inputs.py
+python scripts/02_review_results.py
+```
+
+第一项使用Python标准库；第二项需要pandas、numpy、matplotlib。先预测对齐后的样本数和计数总和≥10保留行数，再读 `outputs/input_audit.json`。第二项产生完整审阅表、火山图和参数记录。
+
+已有R/DESeq2和pheatmap环境可运行：
+
+```powershell
+Rscript scripts/03_deseq2.R
+```
+
+R入口从本地计数重新拟合`~ cell + dex`模型；显式比较trt相对untrt。脚本不安装依赖、不访问网络。除完整结果、阈值子表和样本标准化因子外，脚本还保存设计矩阵、VST后PCA坐标与解释方差、前30个基因的行z-score热图及其输入表。PCA使用方差最大的500个基因，热图按padj选择基因。安装包、R版本与结果字段应写入运行记录。未备好R环境时，先完成离线读表任务，记录尚未重新建模。
+
+先用默认阈值核对正文已给出的结果，再把`--lfc`改为2，预测变化后运行并记录。独立练习与提交要求见 `exercises/独立练习.md`，文件含义见 `data/data_dictionary.md`，来源见 `sources/来源.md`。
+
+12.6使用的历史GO Biological Process ORA表位于`reference/enrichment_results.csv`。它保留2026-08-21课程材料中的4,242条参考结果（上调2,080条，下调2,162条），背景13,927个基因，映射后的上调391、下调376个候选基因。本地核对需要pandas、numpy和scipy：
+
+```powershell
+python scripts/04_review_enrichment.py
+```
+
+该脚本依据表中集合计数重算超几何P值，再在每个方向内核对BH校正，输出`enrichment_review.json`和逐条核对表。它不查询注释库、不重做ID映射；GSEA没有运行。结合来源与数据库版本审阅正文的富集解释。
+
+<a id="chapter-13"></a>
+
+## 第13章开始说明
+
+# 第13章学生练习：公共记录、序列格式与ID映射
+
+本包让你在没有网络或凭据时，核对一条历史公共数据库记录、两组构造双端reads、一个构造VCF以及已保存的ID查询结果。FASTA、FASTQ和VCF为教学构造，来自不同对象层次，不能把它们当成真实测序流程产生的一套样本。ID映射是2026-07-10查询缓存；GSE35570记录是同日已保存观察，不代表今天重新查询。
+
+在解压的practice目录运行：
+
+```powershell
+python scripts/01_check_sequences.py
+python scripts/02_map_ids.py
+```
+
+两个入口只使用Python标准库，按脚本位置寻找文件。运行前手数FASTA记录、read记录与VCF类型，运行后逐项核对 `outputs/format_audit.json`。第二个入口保留成功与未匹配ID，检查查询日期与物种字段。
+
+参考结果可从正文的构造VCF表和ID表核对；独立练习见 `exercises/独立练习.md`。需要拓展时从 `sources/来源.md` 的官方链接自行核验公共记录与许可，再决定是否下载。基础任务没有在线查询和完整测序下载。
