@@ -25,14 +25,14 @@
 1. 填写一张图表设计规范卡，写清问题、数据、编码、图注和导出要求。
 2. 从原始文件追踪到分析表和作图数据表，说明纳入规则、缺失和样本数变化。
 3. 检查坐标轴、单位、尺度、图例、颜色、标注、子图和分面。
-4. 根据问题和变量结构选择图形，并说明图形的解释边界。
+4. 根据问题和变量结构选择图形，并说明图形的分析信息。
 5. 写出可独立阅读的图注，区分观察、统计信息、医学解释和待验证内容。
 6. 整理规范卡、作图数据表、脚本、图形、环境和人工核验记录。
 7. 比较 ggplot2 与 matplotlib 输出，判断数据语义是否一致。
 
 ## 阅读指南
 
-NHANES 2017-2018 用于演示记录筛选、ALT/AST 图表和图注；Bioconductor `airway` 用于检验同一规范能否迁移到组学图。两套数据不合并分析。
+NHANES 2017-2018用于演示记录筛选、ALT/AST图表和图注；Lolamicin时间杀菌记录承接第4至6章，比较全部原始点、均值与不同误差线。两套数据分别回答各自的图表问题。
 
 不必一次运行所有代码。先读数据表和图，再识别代码中的三个动作：读入哪张表，哪些字段映射到图，图保存到哪里。完整脚本用于后续复现和独立核验。
 
@@ -62,6 +62,10 @@ flowchart LR
   G --> H["渲染和人工核验"]
   H --> I["可复现图表包"]
 ```
+
+![第7章教学流程与关系](assets/chapter-7-points-sd-sem.png)
+
+图中点位用于说明图形编码。SD描述观察值的离散程度；SEM为SD除以样本量平方根，表示均值的标准误。正文与练习代码用实际实验表计算。
 
 ## 7.1 图表问题、数据来源与视觉编码
 
@@ -111,7 +115,7 @@ flowchart LR
 
 同一张成人分析表生成 ALT 图和 AST 图时，分母已经发生变化。多子图若只写一个总样本量，读者无法判断每个指标实际使用了多少记录。
 
-本章保留调查设计字段，但图形只做未加权记录描述。图中的男性、女性分组来自公开人口学字段。图形不代表美国成人总体估计，也不提供肝病诊断、参考区间判断或临床建议。
+本章保留调查设计字段，但图形只做未加权记录描述。图中的男性、女性分组来自公开人口学字段。
 
 ### 先看记录怎样进入分析表
 
@@ -158,7 +162,7 @@ flowchart LR
 ```python
 import pandas as pd
 
-df = pd.read_csv("assets/data/nhanes_2017_2018_adult_alt_ast.csv")
+df = pd.read_csv("data/raw/nhanes_2017_2018_adult_alt_ast.csv")
 print(len(df))                         # 5533
 print(df["ALT_U_L"].notna().sum())    # 5153
 print(df["AST_U_L"].notna().sum())    # 5137
@@ -184,7 +188,7 @@ print(df["AST_U_L"].notna().sum())    # 5137
 | 问题 | 展示当前成人体检记录中 ALT 按公开性别字段分组的未加权分布 |
 | 数据 | `DEMO_J` 与 `BIOPRO_J` 按 `SEQN` 连接；成人体检记录 5,533 条；ALT 非缺失 5,153 条 |
 | 编码 | x 为 sex，y 为 ALT（U/L）；使用明确标注的 log10 尺度；男性蓝色、女性橙色；显示单个记录 |
-| 图注 | 说明数据周期、纳入规则、未加权范围、点与箱体含义、两组 n 和尺度；不写诊断或总体推断 |
+| 图注 | 说明数据周期、纳入规则、未加权范围、点与箱体含义、两组 n 和尺度；保留实际数据口径 |
 | 导出 | 保存作图数据表、R/Python 脚本、SVG/PDF、300 dpi PNG、环境和人工核验记录 |
 
 视觉编码（visual encoding）指变量怎样进入图。数值可以映射到位置或颜色深浅，分类变量可以映射到颜色、形状或分面，样本可以显示为点。初学者先保证位置、颜色和图例清楚，再增加其他编码。
@@ -204,11 +208,11 @@ print(df["AST_U_L"].notna().sum())    # 5137
 | --- | --- | --- |
 | 目标 | 图表问题 | 展示 ALT 未加权分布 |
 | 上下文 | 数据来源和纳入规则 | `DEMO_J`、`BIOPRO_J`、成人体检记录 |
-| 约束 | 编码与图注边界 | 蓝橙配色、log10、不写诊断 |
+| 约束 | 编码与图注边界 | 蓝橙配色、log10及有效n |
 | 验证 | 图表规范检查 | 核对 5,153 条记录和两组 n |
 | 输出 | 可复现图表包 | CSV、R/Python、SVG、PNG、session、核验记录 |
 
-学生向 AI 提交绘图任务时，应把规范卡中的真实字段复制到上下文和约束中。AI 不应自行猜测 `LBXSATSI` 的含义，也不应把公开性别字段改写成生物学机制变量。
+学生向 AI 提交绘图任务时，应把规范卡中的真实字段复制到上下文和约束中。LBXSATSI的定义来自数据字典，公开性别字段按原数据标签保存。
 
 ## 7.2 坐标轴、图例、颜色、标注与多子图
 
@@ -241,9 +245,9 @@ print(df["AST_U_L"].notna().sum())    # 5137
 
 ![NHANES ALT规范图](assets/fig_nhanes_alt_ggplot2.png)
 
-图7-2　NHANES 2017-2018 成人体检记录中 ALT 的未加权分布。每个点代表一条 ALT 非缺失记录；箱体表示四分位范围，中线表示中位数；纵轴使用 log10 尺度。男性 n=2,480，女性 n=2,673。本图描述当前记录，不作总体估计或临床判断。
+图7-2　NHANES 2017-2018 成人体检记录中 ALT 的未加权分布。每个点代表一条 ALT 非缺失记录；箱体表示四分位范围，中线表示中位数；纵轴使用 log10 尺度。男性 n=2,480，女性 n=2,673。
 
-这次修改没有删除高值，也没有把分布压缩成两个均值。读者可以看到中心位置、离散程度、重叠范围和长尾。图形仍然不回答组间差异是否具有统计意义，第8章会处理预设比较、效应量和不确定性。
+这次修改没有删除高值，也没有把分布压缩成两个均值。读者可以看到中心位置、离散程度、重叠范围和长尾。第8章继续处理预设比较、效应量和不确定性。
 
 ### 同一作图数据表生成 R 与 Python 图
 
@@ -252,7 +256,7 @@ print(df["AST_U_L"].notna().sum())    # 5137
 #### R/ggplot2 的关键动作
 
 ```r
-alt <- read.csv("assets/data/nhanes_alt_plot_source.csv")
+alt <- read.csv("outputs/nhanes_ALT_U_L_plot_source.csv")
 alt$sex <- factor(alt$sex, levels = c("Male", "Female"))
 p <- ggplot(alt, aes(sex, ALT_U_L, fill = sex)) +
   geom_violin(trim = FALSE) + geom_boxplot(width = 0.16) +
@@ -264,7 +268,7 @@ ggsave("fig_nhanes_alt_ggplot2.svg", p, width = 89, height = 78, units = "mm")
 #### Python/matplotlib 的关键动作
 
 ```python
-alt = pd.read_csv("assets/data/nhanes_alt_plot_source.csv")
+alt = pd.read_csv("outputs/nhanes_ALT_U_L_plot_source.csv")
 groups = [alt.loc[alt["sex"] == s, "ALT_U_L"] for s in ["Male", "Female"]]
 fig, ax = plt.subplots(figsize=(3.5, 3.1))
 ax.violinplot(groups, showmedians=True)
@@ -337,13 +341,13 @@ Nature 的研究图形指南可作为教学示例：常见栏宽示例为 89 mm 
 
 ## 7.3 按问题和变量选择医药数据图表
 
-图表类型由问题、变量结构和解释边界共同决定。选择前先明确要观察分布、比较组别、检查关系，还是查看高维样本结构；随后确认变量是连续、分类、时间、空间还是矩阵特征。图形名称相同，也可能因观察单位和聚合方式不同而表达完全不同的问题。
+图表类型由问题、变量结构和分析信息共同决定。选择前先明确要观察分布、比较组别、检查关系，还是查看高维样本结构；随后确认变量是连续、分类、时间、空间还是矩阵特征。图形名称相同，也可能因观察单位和聚合方式不同而表达完全不同的问题。
 
 选定图形后，还要检查它保留了哪些信息。均值图会隐藏分布，平滑趋势可能弱化原始点；降维坐标则省略了高维距离的构成。合适的图形应让当前问题所需的比较可以被看见，同时把样本、尺度和限制交代清楚，无须容纳与问题无关的信息。
 
 ### 问题类型与变量结构选择矩阵
 
-| 图表问题 | 变量结构 | 首选图形 | 必备信息 | 解释边界 |
+| 图表问题 | 变量结构 | 首选图形 | 必备信息 | 分析信息 |
 | --- | --- | --- | --- | --- |
 | 一个连续变量怎样分布 | 一个连续变量 | 直方图、点图、经验分布 | 单位、样本范围、n、bin 或点含义 | 分布形态受尺度和 bin 影响 |
 | 不同组的连续变量怎样分布 | 连续变量加分组 | 箱线图、小提琴图、散点或区间图 | 每组 n、样本点、中心和离散定义 | 图形重叠不能直接写成无差异 |
@@ -399,17 +403,17 @@ PCA、热图、火山图和 UMAP 会在后续章节详细讲解。本章只建�
 | ALT 与 AST 是否同时出现高值 | `ALT_U_L`、`AST_U_L` | 散点图 | 两指标的共同分布 |
 | ALT 和 AST 怎样并列展示 | 指标、数值、分组 | 多子图 | 两指标分布与各自有效 n |
 
-图形选择还要考虑记录数。8 个 `airway` 样本适合显示全部点。5,153 条 ALT 记录若全部使用不透明点，中心区域会严重重叠。可以降低透明度、使用抖动或显示分布轮廓，但不能因此删除高值记录。
+图形选择还要考虑记录数。Lolamicin每个处理和时间的3条记录适合显示全部点。5,153 条 ALT 记录若全部使用不透明点，中心区域会严重重叠。可以降低透明度、使用抖动或显示分布轮廓，但不能因此删除高值记录。
 
 ### 图形审阅按三层推进
 
-学生面对陌生图形时，可先完成三层检查。第一层看数据对象，确认一行或一个点代表什么。第二层看编码，确认位置、颜色、形状和子图对应哪些字段。第三层看解释边界，判断图形观察是否被写成统计、因果或医学结论。
+学生面对陌生图形时，可先完成三层检查。第一层看数据对象，确认一行或一个点代表什么。第二层看编码，确认位置、颜色、形状和子图对应哪些字段。第三层看分析信息，判断图形观察是否被写成统计、因果或医学结论。
 
 | 层级 | 核心提问 | 常见错误 |
 | --- | --- | --- |
 | 数据对象 | 一个点、一条线或一个箱体来自哪些记录 | 把细胞数当样本数 |
 | 视觉编码 | 颜色、形状、尺度和分面映射哪些变量 | 同一颜色在不同图中表示不同组 |
-| 解释边界 | 当前图直接支持什么 | 把 PCA 分离写成显著差异 |
+| 分析信息 | 当前图直接支持什么 | 把 PCA 分离写成显著差异 |
 
 ## 7.4 图注写作与统计信息呈现
 
@@ -419,7 +423,7 @@ PCA、热图、火山图和 UMAP 会在后续章节详细讲解。本章只建�
 
 ### 图注要让图可以独立阅读
 
-图注承担六项信息：图的对象、视觉编码、样本与缺失、统计或尺度、缩写、解释边界。标题只说明图的身份，图注需要解释读图规则。
+图注承担六项信息：图的对象、视觉编码、样本与缺失、统计或尺度、缩写、分析信息。标题只说明图的身份，图注需要解释读图规则。
 
 | 图注部分 | 应回答的问题 | NHANES ALT 示例 |
 | --- | --- | --- |
@@ -444,7 +448,7 @@ PCA、热图、火山图和 UMAP 会在后续章节详细讲解。本章只建�
 
 合格图注可写为：
 
-> 图7-2　NHANES 2017-2018 成人体检记录中 ALT 的未加权分布。每个点代表一条 ALT 非缺失记录；箱体表示四分位范围，中线表示中位数。男性 n=2,480，女性 n=2,673。纵轴使用 log10 尺度。图中分组来自公开人口学字段，结果限于当前分析记录，不作美国成人总体估计或临床诊断。
+> 图7-2　NHANES 2017-2018 成人体检记录中 ALT 的未加权分布。每个点代表一条 ALT 非缺失记录；箱体表示四分位范围，中线表示中位数。男性 n=2,480，女性 n=2,673。纵轴使用 log10 尺度。图中分组来自公开人口学字段。
 
 ### 统计信息的最低说明
 
@@ -486,46 +490,57 @@ PCA、热图、火山图和 UMAP 会在后续章节详细讲解。本章只建�
 | 支持性模式 | 提示、与……一致 | 明确替代解释和仍需验证内容 |
 | 医学或机制判断 | 需进一步证据 | 不由单张图注完成 |
 
-### 论文图复现分三层核对
+### 同一组三条值，怎样选择误差线
 
-Love 等发表的 RNA-seq workflow 使用 `airway` 数据展示差异表达流程。Figure 6 是 PCA 图，横轴 PC1 解释 42% 的变化，纵轴 PC2 解释 26%。原图标出处理状态和细胞系。文章采用 CC BY 许可，教材使用时保留作者、年份、DOI 和来源。
+第4章从Lolamicin 2小时的6000、18000、51000 CFU/mL计算均值25000。第6章按处理和时间汇总36行记录，本章接着决定怎样把这些数放进图中。先保留三条原始值，再讨论汇总和误差线，读者便能看到每个统计量来自哪里。
 
-| 论文原图 | 依据公开坐标生成的规范复现图 |
-| --- | --- |
-| ![Love等workflow Figure 6原图](assets/love2016_rnaseqGene_figure6_original.png) | ![airway PCA ggplot2复现](assets/fig_airway_pca_ggplot2.png) |
+样本标准差SD的计算先求每个值与均值的差。这三个差依次为−19000、−7000、26000；平方后相加得到1086000000。用n−1=2作分母，再开平方，得到SD约23302.36 CFU/mL。均值标准误SEM按SD/√n计算，在本例中约13453.62 CFU/mL。
 
-图7-4　Love 等 RNA-seq workflow Figure 6 与依据公开坐标生成的规范复现图。来源：Love MI, Anders S, Kim V, Huber W. RNA-Seq workflow: gene-level exploratory analysis and differential expression. F1000Research. 2016;4:1070. DOI: `10.12688/f1000research.7035.2`，CC BY。
+```python
+values = pd.Series([6000, 18000, 51000])
+n = values.count()
+mean_cfu = values.mean()
+sd_cfu = values.std(ddof=1)
+sem_cfu = sd_cfu / n ** 0.5
+print(n, mean_cfu, sd_cfu, sem_cfu)
+```
 
-#### 复现的三层记录
+count数非缺失值，所以n为3；mean计算算术均值；std的ddof=1令方差分母为n−1。`n ** 0.5`计算n的平方根。程序依次输出3、25000、约23302.36和13453.62，与前面的手算对应。SD概括这三条值的离散，SEM用于表示在相应抽样和独立重复条件下均值的不确定性。图注须写出使用哪一个统计量。
 
-复现需要分开核对三层。数据层检查 8 个样本和坐标是否一致。计算层检查坐标来自论文公开结果，还是由当前软件环境重新计算。表达层检查颜色、形状、轴范围、图例和标签。样式调整不能被写成新的计算结果。
+![Lolamicin同一三条记录的SD与SEM](assets/fig_lolamicin_sd_sem.png)
 
-公开坐标表如下。每行对应一个样本，`dex` 表示处理状态，`cell_line` 表示细胞系。PC1 和 PC2 的解释率来自论文图。
+图7-4　Lolamicin 4×MIC、2小时记录的两种汇总表示。蓝点分别为6000、18000、51000 CFU/mL。黑点为算术均值25000，左图误差线为均值±样本SD，右图为均值±SEM；每图使用同一组三条值，纵轴为线性尺度。重复说明沿用作者原图注。
 
-| sample_id | PC1 | PC2 | dex | cell_line |
-| --- | ---: | ---: | --- | --- |
-| SRR1039508 | -17.889 | -4.158 | untrt | N61311 |
-| SRR1039509 | 8.437 | -1.651 | trt | N61311 |
-| SRR1039512 | -10.278 | -5.067 | untrt | N052611 |
-| SRR1039513 | 17.643 | -3.911 | trt | N052611 |
-| SRR1039516 | -14.741 | 15.990 | untrt | N080611 |
-| SRR1039517 | 10.956 | 20.806 | trt | N080611 |
-| SRR1039520 | -12.120 | -11.963 | untrt | N061011 |
-| SRR1039521 | 17.992 | -10.047 | trt | N061011 |
+两个面板的原始点和黑点均相同，右侧误差线较短来自除以√3。判断图是否被改变时，应分别核对原始值、中心统计量和误差线定义。把SD换成SEM会改变图中线的长度，输入数据没有发生变化。
 
-| 层级 | 本例核验内容 | 记录方式 |
+现有36行表保留处理、时间、单位及source_cell。每个处理和时间都先取出三条值，再以相同规则计算n、mean、sd、sem。2小时这组三条值可以作为整张汇总表的手算核对点；还可选Ciprofloxacin 4小时的700、2400、200，核对均值1100。
+
+### 对数纵轴下先确定计算尺度
+
+CFU/mL跨越多个数量级，原始点图使用对数纵轴可以同时展示高值和低值。本章先在原始CFU/mL上求算术均值，再把这个均值画到对数纵轴上。它与先对每个值取log、再计算平均的做法不同。
+
+```python
+arithmetic_mean = values.mean()
+mean_log10 = np.log10(values).mean()
+geometric_mean = 10 ** mean_log10
+print(arithmetic_mean, geometric_mean)
+```
+
+算术均值先相加再除以3。另一段计算先把三个值转换成log10，平均后取10的相应次方，得到几何均值。学生可以分别运行并核对两个结果，再在图注写清中心统计量及计算尺度。纵轴显示方式由set_yscale设置，统计量由前面的代码计算；二者分别检查。
+
+SD误差线有时会给出低于0的下端点。例如8小时三条值为200、5500、100，算术均值约1933.33，而SD大于均值。mean−SD是对称误差线的计算端点；原始三条观测仍都是正数。对数轴无法表示这个非正端点。此时先查看数据和计算定义，再选择线性图、单独展示原始点，或适合当前统计目标的区间方法。独立练习会让你实际修改时间并查看输出。
+
+### 由记录核对复现的三层信息
+
+复现图表时，数据层核对每个值与来源位置；计算层核对分组和统计量；表达层核对颜色、点、线、单位及尺度。Lolamicin三条值对应E3/F3/G3，均值25000可由手算复核；画图的点形和字体则属于表达层。
+
+| 层级 | 本例核对对象 | 保留文件 |
 | --- | --- | --- |
-| 数据层 | 8 个样本、PC1/PC2 坐标、处理状态和细胞系 | 保存坐标 CSV |
-| 计算层 | 公开坐标或当前 DESeq2 环境重算 | 文件名和 session 分开记录 |
-| 表达层 | 颜色、形状、图例、轴和标签 | 保存绘图脚本与规范卡 |
+| 数据 | 36个值、处理、时间、CFU/mL与源单元格 | 原始CSV与作图数据表 |
+| 计算 | 12组，每组三条；n、均值、SD、SEM与计算尺度 | 汇总CSV与脚本 |
+| 表达 | 颜色、原始点、中心线、误差线、轴与图注 | PNG、SVG/PDF与规范卡 |
 
-公开坐标复现与当前环境重算可能因软件版本、预处理和随机性出现差异。正文应说明差异来源，不能只挑更接近原图的版本。
-
-![airway PCA当前环境重算](assets/fig_airway_pca_recomputed.png)
-
-图7-5　当前本机 R/DESeq2 环境重新计算的 `airway` PCA 图。该图与公开坐标复现图分开保存。比较时检查样本关系、处理状态和细胞系，不把坐标数值差异解释成新的生物学发现。
-
-复现报告应写清采用哪一条路线。若使用论文公开坐标，报告重点是图形编码和版式复现。若从计数矩阵重算，报告还要记录过滤、转换、PCA 输入和软件版本。两种路线不能共用同一文件名。
+同一CSV在R和Python中重新汇总后，比较相同处理和时间的数值。改变颜色或字号后，12组统计量应保持不变；改变分组字段或统计尺度后，输出需要重新核对。这样能分辨一次修改发生在计算过程还是图形呈现。
 
 ## 7.5 作图数据表、脚本与可复现导出
 
@@ -541,85 +556,94 @@ Love 等发表的 RNA-seq workflow 使用 `airway` 数据展示差异表达流�
 | 来源 | 图注、引用、许可或重绘说明 |
 | 导出 | 作图数据、脚本、SVG/PDF、PNG 和最终尺寸检查 |
 
-### 从计数矩阵整理出样本级 QC 表
+### 从36行记录到12组汇总，保留两张作图表
 
-Bioconductor `airway` 数据包包含人气道平滑肌细胞的 bulk RNA-seq 计数数据。教学子集有 8 个样本，4 个细胞系各包含未处理和 dexamethasone 处理样本。原始计数矩阵有 63,677 行基因和 8 列样本。
-
-样本级 QC 图不需要把 63,677 行全部交给绘图函数。先为每个样本计算总计数 `library_size`，再计算计数大于 0 的基因数 `detected_genes`，得到 8×5 作图数据表。
-
-| sample_id | cell_line | dex | library_size | detected_genes |
-| --- | --- | --- | ---: | ---: |
-| SRR1039508 | N61311 | untrt | 20,637,971 | 24,633 |
-| SRR1039509 | N61311 | trt | 18,809,481 | 24,527 |
-| SRR1039512 | N052611 | untrt | 25,348,649 | 25,699 |
-| SRR1039513 | N052611 | trt | 15,163,415 | 23,124 |
-| SRR1039516 | N080611 | untrt | 24,448,408 | 25,508 |
-| SRR1039517 | N080611 | trt | 30,818,215 | 25,998 |
-| SRR1039520 | N061011 | untrt | 19,126,151 | 24,662 |
-| SRR1039521 | N061011 | trt | 21,164,133 | 23,991 |
-
-`library_size` 是每个样本计数列的总和。`detected_genes` 是该样本中计数大于 0 的基因数。它们用于回查样本，不直接判定实验失败或生物学异常。判断异常还需要实验设计、测序质控和其他预设指标。
-
-![airway样本级QC图](assets/fig_airway_qc_panels.png)
-
-图7-6　`airway` 8 个样本的样本级 QC。a，总计数；b，检测基因数。点代表样本，颜色表示 `dex` 状态。两项指标用于样本回查，不支持差异表达或机制结论。
-
-课堂短检查可以指定样本 `SRR1039517`。学生先在表中找到总计数 30,818,215 和检测基因数 25,998，再回到图中定位该点。这个动作说明图中的点可以追溯到具体记录。
-
-### ggplot2 与 matplotlib 读取同一份 CSV
-
-两种工具的语法不同，图中的数据语义应一致。它们读取同一份 `airway_pca_published_coordinates.csv`，使用同一组序、颜色、形状、坐标和轴说明。
-
-#### R/ggplot2 的三个动作
-
-```r
-qc <- read.csv("assets/data/airway_pca_published_coordinates.csv")
-p <- ggplot(qc, aes(PC1, PC2, colour = dex, shape = cell_line)) +
-  geom_point(size = 2.4) + labs(x = "PC1: 42% variance", y = "PC2: 26% variance")
-ggsave("fig_airway_pca_ggplot2.svg", p, width = 89, height = 72, units = "mm")
-```
-
-#### Python/matplotlib 的三个动作
+原始点图需要36条value及处理、时间；均值线需要12组汇总。将二者分别保存，能够解释图中哪一层使用原始记录，哪一层使用汇总值。
 
 ```python
-qc = pd.read_csv("assets/data/airway_pca_published_coordinates.csv")
-for (dex, cell), part in qc.groupby(["dex", "cell_line"]):
-    ax.scatter(part["PC1"], part["PC2"], label=f"{dex}, {cell}")
-fig.savefig("fig_airway_pca_matplotlib.svg", bbox_inches="tight")
+df = pd.read_csv("data/raw/lolamicin_ecoli_timekill.csv")
+summary = (df.groupby(["treatment", "time_h"], sort=False)["value"]
+             .agg(n="count", mean="mean", sd="std").reset_index())
+summary["sem"] = summary["sd"] / np.sqrt(summary["n"])
+df.to_csv("outputs/lolamicin_plot_source.csv", index=False)
+summary.to_csv("outputs/lolamicin_summary_python.csv", index=False)
 ```
 
-上面的 R 片段需要读取 PCA 坐标表，正式脚本已经使用对应文件名。课堂阅读时关注 `read`、`aes` 或 `scatter`、`save` 三类动作。完整脚本保存在配套材料包，避免学生现场处理安装和环境问题。
+groupby中的两个字段共同定义一组，因此同一时间不同处理分别汇总。方括号取value列；agg一次生成n、mean、sd三列，左边名称决定输出列名，右边指定计算。reset_index把分组字段恢复为普通列，后续按treatment选择仍使用列名。SEM列由已经算出的SD和n逐行计算。运行后summary为12行，df仍为36行；保存时index=False避免将程序行号写成新的数据字段。
 
-| ggplot2输出 | matplotlib输出 |
-| --- | --- |
-| ![airway PCA ggplot2](assets/fig_airway_pca_ggplot2.png) | ![airway PCA matplotlib](assets/fig_airway_pca_matplotlib.png) |
+接着画全部原始点及12组算术均值。先按处理逐次取出一张part，再将time_h与value送入scatter；均值线从summary中选同一处理，按时间排序后交给plot。
 
-图7-7　同一公开 PCA 坐标表生成的 ggplot2 与 matplotlib 输出。样本、坐标、处理状态、细胞系、颜色、形状和轴解释率应一致。字体、留白、图例位置和默认线宽可以不同。
+```python
+fig, ax = plt.subplots(figsize=(7, 4))
+for treatment, part in df.groupby("treatment", sort=False):
+    ax.scatter(part["time_h"], part["value"], color=colors[treatment])
+    means = summary.loc[summary["treatment"] == treatment].sort_values("time_h")
+    ax.plot(means["time_h"], means["mean"], "--",
+            color=colors[treatment], label=treatment)
+ax.set_yscale("log")
+ax.set_xlabel("Time (h)")
+ax.set_ylabel("CFU/mL, log10 scale")
+ax.legend()
+```
 
-跨工具核验不要求像素完全相同。学生应优先检查以下信息。
+本循环重复3次，每次scatter取得12条原始记录，plot取得4个时间均值。colors是处理名称与色值的字典，点和均值线都从同一字典查颜色。`"--"`设置虚线；这条线连接同一处理的各时间均值。source_cell保留在作图数据表中，读者仍能回查某个点，例如2小时Lolamicin的51000来自G3。
+
+![Lolamicin全部原始点与算术均值](assets/fig_lolamicin_points_means.png)
+
+图7-5　E. coli BW25113时间杀菌记录。点代表作者表中的CFU/mL值，每个处理和时间各三条；虚线连接各时间的算术均值。横轴为取样时间1、2、4、8小时，纵轴为对数尺度；处理标签与配色保持一致。来源为作者ED Fig.3a工作表。
+
+图中对照组的数值跨度较大，原始点显示了这部分差异。若只画均值线，读者会失去同一时间内的离散信息。因此点和线分别保留。检查时先回到CSV核对三个点，再检查汇总行，最后观察图中位置。
+
+### R与Python读取同一份CSV
+
+R对照使用同一36行表，分别按处理和时间切成12组。在每组中数非缺失值、求mean和sd，再计算sem。完整演示采用基础R，免去绘图扩展包安装；既有NHANES例仍展示ggplot2写法。
+
+```r
+df <- read.csv("data/raw/lolamicin_ecoli_timekill.csv")
+parts <- split(df, list(df$treatment, df$time_h), drop=TRUE)
+summary <- do.call(rbind, lapply(parts, function(x) {
+  data.frame(treatment=x$treatment[1], time_h=x$time_h[1],
+             n=sum(!is.na(x$value)), mean=mean(x$value), sd=sd(x$value))
+}))
+summary$sem <- summary$sd / sqrt(summary$n)
+```
+
+split的结果是由多张组内小表组成的列表。lapply依次把每张小表传给函数中的x，返回一行结果；rbind把12行结果接成一张表。R的sd与Python默认分母n−1相同。两张汇总表的行序可能不同，比较时按treatment和time_h对齐，逐组核对n、mean、sd、sem。
 
 | 必须一致 | 可以不同 |
 | --- | --- |
-| 输入 CSV 和有效记录 | 字体家族 |
-| 样本与坐标 | 图例位置 |
-| 分组顺序和标签 | 留白和边距 |
-| 颜色和形状含义 | 默认线宽 |
-| 轴标题、单位和解释率 | 图层实现方式 |
-| 坐标范围和被标注样本 | 文件内部结构 |
+| 同一36行输入与来源字段 | 表格打印的小数位 |
+| 每组处理、时间、n与统计量 | 汇总行的显示顺序 |
+| 点的值、轴单位与尺度 | 字体与留白 |
+| 颜色和处理标签的含义 | 图例位置与内部文件结构 |
+
+### 导出也是脚本中的一步
+
+PNG供预览，SVG/PDF保存可缩放的线和文字。下面把同一fig依次导出三种格式。
+
+```python
+fig.tight_layout()
+for extension in ["png", "svg", "pdf"]:
+    fig.savefig(f"outputs/lolamicin_points_means_python.{extension}",
+                dpi=300, bbox_inches="tight")
+plt.close(fig)
+```
+
+tight_layout调整子图与标签的间距；循环中的extension依次为三个扩展名，f字符串把它接入文件名。dpi设置PNG像素密度，SVG/PDF中的矢量线和文字仍按矢量保存；bbox_inches缩紧输出边界，导出后仍需实际打开检查图例、长标签和裁切。close结束当前画布，后续再创建新图。
 
 ### 可复现图表包
 
 一张可提交图应配套保存规范卡、作图数据表、脚本、正式图、预览图、环境和核验记录。PNG 便于预览，SVG 或 PDF 便于编辑和正式使用。截图不能替代脚本导出。
 
 ```text
-fig_airway_pca/
-├── fig_airway_pca_design.md
-├── airway_pca_published_coordinates.csv
-├── fig_airway_pca_ggplot2.R
-├── fig_airway_pca_matplotlib.py
-├── fig_airway_pca.svg
-├── fig_airway_pca.pdf
-├── fig_airway_pca_preview.png
+fig_lolamicin_timekill/
+├── fig_lolamicin_timekill_design.md
+├── lolamicin_ecoli_timekill.csv
+├── fig_lolamicin_timekill_ggplot2.R
+├── fig_lolamicin_timekill_matplotlib.py
+├── fig_lolamicin_timekill.svg
+├── fig_lolamicin_timekill.pdf
+├── fig_lolamicin_timekill_preview.png
 ├── session.txt
 └── ai_review.md
 ```
@@ -658,41 +682,30 @@ flowchart LR
 
 第3章的 AI 任务说明书仍然有效。图表设计规范卡说明图要怎样表达；AI 任务说明书说明 AI 可以做什么、怎样验证和输出到哪里。两份文件承担不同责任，应一起进入课程项目记录。
 
-### 一份可执行的 AI 作图说明
+### 一份可执行的AI作图说明
 
-零基础学生可以用自然语言写任务，不需要先学习 JSON 或复杂配置。任务中必须给出真实字段、允许操作和验收条件。
+完成规范卡后，再把真实字段和核对值传给AI。下面的任务只调整已经学会的图形表达。
 
 ```text
-目标：
-根据 airway_pca_published_coordinates.csv 生成 PCA 散点图。
-
-数据：
-每行是一个样本。坐标字段为 PC1、PC2；颜色字段为 dex；
-形状字段为 cell_line；共有 8 行，不得删除或新增样本。
-
-编码：
-untrt 使用蓝色 #0072B2，trt 使用橙色 #E69F00。
-横轴写 PC1: 42% variance，纵轴写 PC2: 26% variance。
-样本标签和图例不得交换。
-
-图注：
-只描述 8 个样本在 PCA 坐标中的位置及编码。
-不写差异表达、机制、疗效或临床建议。
-
-导出：
-输出 SVG、PDF 和 300 dpi PNG；保存运行警告和软件版本。
+根据lolamicin_ecoli_timekill.csv生成原始点与均值线图。
+输入36行，一行是指定处理、时间及源列中的CFU/mL值。
+横轴time_h，纵轴value，颜色对应treatment。
+保留全部36个点；按treatment和time_h计算12组算术均值。
+灰色对照，蓝色Lolamicin，橙色Ciprofloxacin。
+纵轴用对数尺度，轴写Time (h)和CFU/mL。
+保存原始作图表、12组汇总、SVG/PDF/300 dpi PNG。
+核对Lolamicin 2小时均值25000，Ciprofloxacin 4小时均值1100。
 ```
 
-AI 返回代码后，学生先运行，再填写核验记录。下面是一份最小记录样例。
+运行后，记录自己的实际检查。规范卡规定数据和表达，记录表说明AI进行了哪项修改、本人怎样核对。没有发现错误时，写出检查依据即可。
 
-| 记录项 | 样例填写 |
+| 记录项 | 本人应填写 |
 | --- | --- |
-| 输入检查 | CSV 为 8 行、7 列；8 个 `sample_id` 均唯一 |
-| AI 初稿问题 | 图例按字母顺序重排；未固定颜色；PNG 未设置 dpi |
-| 人工修改 | 固定 `dex` 顺序和颜色；补 PC 解释率；增加 SVG/PDF/PNG 导出 |
-| 运行结果 | 三种文件均生成；无缺失样本；SVG 重新打开正常 |
-| 解释检查 | 删除“处理导致样本明显分离”的句子 |
-| 最终状态 | 通过数据、编码、文字、运行和留痕检查 |
+| 输入 | 文件版本、36行、真实字段及来源位置 |
+| 修改 | AI建议与本人采用的具体语句 |
+| 计算 | 12组、每组三条、指定均值核对 |
+| 图形 | 全部点、颜色、单位、尺度、图例 |
+| 导出 | 文件是否生成并实际打开 |
 
 ### 先处理阻断项，再处理样式
 
@@ -728,16 +741,16 @@ AI 返回代码后，学生先运行，再填写核验记录。下面是一份�
 
 | 文件 | 建议命名 | 说明 |
 | --- | --- | --- |
-| 规范卡 | `fig07_airway_pca_design.md` | 图7的五项规范 |
-| 作图数据表 | `fig07_airway_pca_source.csv` | 8行公开坐标 |
-| R脚本 | `fig07_airway_pca_ggplot2.R` | ggplot2实现 |
-| Python脚本 | `fig07_airway_pca_matplotlib.py` | matplotlib实现 |
-| 正式图 | `fig07_airway_pca.svg` | 可编辑矢量图 |
-| 预览图 | `fig07_airway_pca_preview.png` | 快速审阅 |
-| 环境记录 | `fig07_airway_pca_session.txt` | 软件与包版本 |
-| 人工核验 | `fig07_airway_pca_ai_review.md` | AI参与和修改记录 |
+| 规范卡 | `fig07_lolamicin_timekill_design.md` | 本图的五项规范 |
+| 作图数据表 | `fig07_lolamicin_timekill_source.csv` | 36行时间杀菌记录 |
+| R脚本 | `fig07_lolamicin_timekill_ggplot2.R` | ggplot2实现 |
+| Python脚本 | `fig07_lolamicin_timekill_matplotlib.py` | matplotlib实现 |
+| 正式图 | `fig07_lolamicin_timekill.svg` | 可编辑矢量图 |
+| 预览图 | `fig07_lolamicin_timekill_preview.png` | 快速审阅 |
+| 环境记录 | `fig07_lolamicin_timekill_session.txt` | 软件与包版本 |
+| 人工核验 | `fig07_lolamicin_timekill_ai_review.md` | AI参与和修改记录 |
 
-若同一图同时保留公开坐标复现和当前环境重算，可在文件名加入 `published_coordinates` 与 `recomputed`。两条计算路线不覆盖彼此。
+若同一图同时保留不同数据版本或统计尺度，可在文件名加入 `raw_scale`与`log_scale`。两条计算路线不覆盖彼此。
 
 ## 常见误区
 
@@ -763,7 +776,7 @@ AI 返回代码后，学生先运行，再填写核验记录。下面是一份�
 - 子图与分面的含义明确，子图标签和正文引用一致。
 - 每个图或子图的有效样本数可以复核。
 - 误差线、区间、阈值和模型线写明定义或来源。
-- 图注说明对象、编码、样本、统计或尺度、缩写和解释边界。
+- 图注说明对象、编码、样本、统计或尺度、缩写和分析信息。
 - R 与 Python 输出使用同一数据和编码规则。
 - 正式图在最终尺寸下重新打开，文字、线条和裁切正常。
 - 图表包包含规范卡、数据、脚本、图、环境和人工核验记录。
@@ -787,11 +800,11 @@ flowchart LR
 | 项目 | 要求 |
 | --- | --- |
 | 输入1 | NHANES ALT 问题图、分析表和作图数据表 |
-| 输入2 | `airway` PCA 坐标表及 ggplot2、matplotlib 输出 |
+| 输入2 | Lolamicin36行表与Python/R输出 |
 | 任务1 | 为 NHANES ALT 图填写五项图表设计规范卡 |
 | 任务2 | 修改标题、轴、单位、尺度、样本点、颜色和样本数说明 |
 | 任务3 | 为 ALT/AST 多子图写完整图注 |
-| 任务4 | 比较 R 与 Python 图，列出必须一致和可以不同的信息 |
+| 任务4 | 比较Lolamicin的R与Python汇总和图形，列出必须一致和可以不同的信息 |
 | 任务5 | 提交一份可复现图表包和 AI 人工核验记录 |
 
 ### 提交核验
@@ -806,39 +819,21 @@ flowchart LR
 | 可复现性 | 数据、脚本、图、环境和记录齐全 |
 | AI 责任 | 能说明 AI 做了什么、人工改了什么 |
 
-## 案例来源与复现入口
+## 练习入口
 
-本章数据和图形均保留来源与脚本。教材正文呈现必要数值、图和检查方法，完整文件进入配套材料包。
+本章[练习包开始说明](../../teaching/chapter-practice.md#chapter-7)提供NHANES5533行成人分析表、Lolamicin36行来源记录、数据字典、图表规范卡、Python/R完整脚本与独立修改任务。脚本从解压根目录运行，输出到outputs。数据来源详见包内sources.md；原始NHANES文件哈希和纳入规则保存于来源元数据。
 
-| 材料 | 官方或论文来源 | 本章用途 |
-| --- | --- | --- |
-| NHANES 2017-2018 demographics | [CDC DEMO_J](https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2017/DataFiles/DEMO_J.xpt) | 年龄、公开性别字段、体检状态和调查设计字段 |
-| NHANES 2017-2018 biochemistry | [CDC BIOPRO_J](https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2017/DataFiles/BIOPRO_J.xpt) | ALT、AST 和单位 |
-| Bioconductor `airway` | [airway package](https://bioconductor.org/packages/airway/) | 8个样本的计数矩阵与样本信息 |
-| RNA-seq workflow | [Love et al., 2016](https://doi.org/10.12688/f1000research.7035.2) | Figure 6、PCA坐标和复现讨论 |
-| Nature图形指南 | [Building and exporting figure panels](https://research-figure-guide.nature.com/figures/building-and-exporting-figure-panels/) | 最终尺寸、字体、线宽和导出示例 |
+先运行演示并核对指定数值，再完成一次只改变数据筛选或图形参数的任务。向同伴交付作图数据与脚本，让对方在新目录重画并解释某一个点对应的记录。
 
-配套材料包保留以下复现入口：
+## 本章总结与分析范围
 
-| 脚本 | 功能 | 主要输出 |
-| --- | --- | --- |
-| `prepare_nhanes_alt_ast.py` | 读取XPT、连接文件、筛选成人记录并生成摘要 | 成人分析表、ALT/AST作图数据表、元数据JSON |
-| `generate_nhanes_figures_ggplot2.R` | 生成ALT规范图和ALT/AST多子图 | SVG/PDF/PNG和R session |
-| `generate_nhanes_figures_matplotlib.py` | 生成问题图与Python版本图形 | SVG/PDF/PNG和Python环境记录 |
-| `generate_airway_figures.R` | 从`airway`对象派生样本级QC | 8×5 QC表和双子图 |
-| `generate_airway_pca_ggplot2.R` | 根据公开坐标生成PCA图 | ggplot2版SVG/PDF/PNG |
-| `generate_airway_pca_matplotlib.py` | 读取同一坐标表生成PCA图 | matplotlib版SVG/PDF/PNG |
-| `recompute_airway_pca_deseq2.R` | 在当前环境重算PCA | 重算坐标、图和session |
+科研图表从明确的问题和同一分析表出发，保留观察值、统计量、编码和导出之间的对应。NHANES的ALT和AST有效记录数分别核对；Lolamicin的36个原始值与12组汇总分别保存，SD、SEM和计算尺度写清。图表包让同伴从图片回到数据，并在新目录重新生成结果。
 
-原始XPT文件的SHA-256、文件大小、下载网址、连接键和纳入规则写入 `nhanes_source_metadata.json`。论文原图保留CC BY来源说明。代码、数据和图形的具体运行状态以材料护照和验收记录为准。
+NHANES本章采用未加权记录描述，总体推断需要复杂抽样设计及相应方法；ALT/AST分布本身不提供诊断或临床建议。Lolamicin图描述原研究条件下的培养计数记录，时间均值线没有补充跨时间样本身份，也不将图形外观推广为临床疗效。PCA、热图、ROC、火山图和UMAP的计算与专业解释在相应章节展开。图注中的统计、医学和机制判断须与实际数据和方法相符。
 
-## 本章小结
+推荐让AI协助局部绘图、排错或文字调整，规范卡先给出真实字段与核对要求。学生检查数据记录、统计定义、视觉编码和实际导出，说明采用了哪些修改，并对最后的图与解释负责。
 
-| 环节 | 本章结论 |
-| --- | --- |
-| 数据 | 科研图表从记录开始。读者需要知道哪些记录进入图、哪些记录因缺失没有进入图，以及视觉元素对应哪个字段。 |
-| 规范卡 | 五项固定为问题、数据、编码、图注、导出。规范卡也用于AI生成后的人工核验。 |
-| 图形 | 坐标轴、单位、尺度、颜色和多子图影响阅读。ALT与AST的有效样本数不同，组合图需要逐图报告。 |
-| 方法边界 | 图形选择服从问题和变量结构。第8至15章继续补充统计、模型和组学方法。图形观察不能替代统计推断或医学论证。 |
-| 图注 | 图注说明对象、编码、样本、统计或尺度、缩写和解释边界。数字来自数据、脚本输出或文献来源。 |
-| 复现与责任 | 图表包保存规范卡、作图数据表、脚本、图、环境和核验记录。学生负责核对数据语义和最终表述。 |
+
+## 本章练习包
+
+[下载第7章学生练习包](../../downloads/chapter-07-practice.zip) · [查看全书练习包](../../teaching/chapter-practice.md)

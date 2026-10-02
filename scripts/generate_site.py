@@ -1,10 +1,17 @@
 from __future__ import annotations
 
 import os
+import argparse
+import json
 import re
 import shutil
 from pathlib import Path
 from urllib.parse import unquote
+
+try:
+    from .practice_resources import inspect_package, load_registry, resource_index
+except ImportError:
+    from practice_resources import inspect_package, load_registry, resource_index
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -73,13 +80,22 @@ def write_text(path: Path, content: str) -> None:
     path.write_text(content.replace("\r\n", "\n"), encoding="utf-8", newline="\n")
 
 
+def public_punctuation(content: str) -> str:
+    # Preserve executable examples; normalize display punctuation only.
+    pieces = re.split(r'(^```[^\n]*\n.*?^```[^\n]*$)', content, flags=re.MULTILINE | re.DOTALL)
+    return ''.join(piece if i % 2 else piece.replace('—', '、').replace('–', '-')
+                   for i, piece in enumerate(pieces))
+
+
 def copy_file(source: Path, target: Path) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, target)
 
 
 def student_facing_support_content(content: str) -> str:
-    return re.split(r"^## 教师提示\s*$", content, maxsplit=1, flags=re.MULTILINE)[0].rstrip() + "\n"
+    public = re.split(r"^## 教师提示\s*$", content, maxsplit=1, flags=re.MULTILINE)[0].rstrip() + "\n"
+    public = re.sub(r'\(\.\./chapters/chapter-(\d+)/practice/README\.md\)', r'(chapter-practice.md#chapter-\1)', public)
+    return public
 
 
 def materialize_external_images(body: Path, target_dir: Path, content: str) -> str:
@@ -116,9 +132,11 @@ def materialize_external_images(body: Path, target_dir: Path, content: str) -> s
     return IMAGE_PATTERN.sub(replace, content)
 
 
-def remove_generated_dirs() -> None:
-    for relative in ["chapters", "teaching", "references", "book-outline"]:
+def remove_generated_dirs(chapters: list[int] | None = None) -> None:
+    relatives = ["chapters", "teaching", "references", "book-outline"] if chapters is None else [f"chapters/chapter-{n}" for n in chapters]
+    for relative in relatives:
         target = DOCS_ROOT / relative
+        target.resolve().relative_to(DOCS_ROOT.resolve())
         if target.exists():
             shutil.rmtree(target)
     for relative in ["index.md", "book-outline.md"]:
@@ -144,16 +162,50 @@ def chapter_body_path(chapter_number: int) -> Path:
     return max(candidates, key=lambda path: path.stat().st_size)
 
 
-def copy_chapters() -> None:
-    for chapter_number in CHAPTER_TITLES:
+def copy_chapters(chapters: list[int] | None = None) -> None:
+    for chapter_number in chapters if chapters is not None else CHAPTER_TITLES:
         source_dir = SOURCE_ROOT / "chapters" / f"chapter-{chapter_number}"
         target_dir = DOCS_ROOT / "chapters" / f"chapter-{chapter_number}"
         body = chapter_body_path(chapter_number)
         assets = source_dir / "assets"
         if assets.exists():
-            shutil.copytree(assets, target_dir / "assets", dirs_exist_ok=True)
+            shutil.copytree(assets, target_dir / "assets", dirs_exist_ok=True,
+                            ignore=shutil.ignore_patterns('results', 'outputs', '__pycache__', '*.log', '*.zip', '.DS_Store'))
         content = materialize_external_images(body, target_dir, read_text(body))
+        # The complete practice directory is in the verified ZIP. Online links
+        # lead to the same chapter entry in the download index.
+        content = content.replace('(practice/README.md)', f'(../../teaching/chapter-practice.md#chapter-{chapter_number})')
+        registry = load_registry(DOCS_ROOT / 'downloads/registry.json')
+        package = next((p for p in registry['packages'] if p['chapter'] == chapter_number), None)
+        if package:
+            content += f'\n\n## 本章练习包\n\n[下载第{chapter_number}章学生练习包](../../downloads/{package["file"]}) · [查看全书练习包](../../teaching/chapter-practice.md)\n'
         write_text(target_dir / "index.md", content)
+        for markdown in target_dir.rglob('*.md'):
+            write_text(markdown, public_punctuation(read_text(markdown)))
+
+
+def copy_practice_packages(chapters: list[int] | None = None) -> None:
+    source_dir = SOURCE_ROOT / 'outputs/2026-10-02-教材更新实施/学生练习包'
+    approved = load_registry(source_dir / 'registry.json')
+    current = load_registry(DOCS_ROOT / 'downloads/registry.json')
+    by_chapter = {p['chapter']: p for p in current['packages']}
+    selected = set(chapters if chapters is not None else CHAPTER_TITLES)
+    for package in approved['packages']:
+        if package['chapter'] not in selected:
+            continue
+        source = source_dir / package['file']
+        inspect_package(source, package)
+        copy_file(source, DOCS_ROOT / 'downloads' / package['file'])
+        by_chapter[package['chapter']] = package
+    registry = {'packages': [by_chapter[n] for n in sorted(by_chapter)]}
+    write_text(DOCS_ROOT / 'downloads/registry.json', json.dumps(registry, ensure_ascii=False, indent=2))
+    index = resource_index(CHAPTER_TITLES, registry)
+    # Stable anchors are independent of automatic Chinese heading IDs.
+    details = []
+    for number in sorted(by_chapter):
+        details.extend([f'<a id="chapter-{number}"></a>', f'\n## 第{number}章开始说明\n',
+                        read_text(SOURCE_ROOT / f'chapters/chapter-{number}/practice/README.md')])
+    write_text(DOCS_ROOT / 'teaching/chapter-practice.md', index + '\n' + '\n'.join(details))
 
 
 def copy_support_files() -> None:
@@ -248,9 +300,9 @@ AI 可以解释报错、整理任务说明、生成局部代码并提出核验�
 
 [进入第2章：WorkBuddy 工作空间与结果核验](chapters/chapter-2/index.md)
 
-## 贯穿案例与使用边界
+## 案例怎样衔接
 
-Bioconductor `airway` 是全书的 bulk RNA-seq 贯穿案例。该数据包含8个人气道平滑肌细胞样本，来自4个细胞系，每个细胞系包含地塞米松处理与未处理样本。教材用它连接 metadata、计数矩阵、质量检查、标准化、PCA、热图、差异表达和富集审阅。
+猜糖豆与Lolamicin案例连接对象、读取、质量检查、整形、汇总和图表；释放实验连接环境操作与AI任务说明。统计与模型章节使用明确标识的教学表，练习计算、诊断与评估。Bioconductor `airway` 集中用于第12章RNA-seq数据链条，连接计数矩阵、样本信息、实验设计和差异结果。
 
 | 案例类型 | 在书中的用途 | 不能据此推出 |
 | --- | --- | --- |
@@ -269,6 +321,7 @@ Bioconductor `airway` 是全书的 bulk RNA-seq 贯穿案例。该数据包含8�
 | 材料 | 页面 |
 | --- | --- |
 | 18周学生学习地图 | [查看](teaching/36-hour-learning-map.md) |
+| 全书学生练习包 | [下载索引](teaching/chapter-practice.md) |
 | 统一综合项目模板 | [查看](teaching/unified-project-template.md) |
 | 第1章课堂任务单 | [查看](teaching/chapter-1-task-sheet.md) |
 | 术语表 | [查看](references/terminology.md) |
@@ -308,7 +361,7 @@ def verify_unified_syllabus() -> None:
     if "# 《医药数据处理与可视化》36课时统一融合修订版" not in syllabus:
         raise ValueError("unified syllabus title or course name is incorrect")
 
-    week_rows = re.findall(r"^\| 第(\d+)周，(\d+)学时 \|(.+)$", syllabus, flags=re.MULTILINE)
+    week_rows = re.findall(r"^\| 第(\d+)(?:课|周)，(\d+)学时 \|(.+)$", syllabus, flags=re.MULTILINE)
     weeks = [int(week) for week, _, _ in week_rows]
     hours = [int(hour) for _, hour, _ in week_rows]
     if weeks != list(range(1, 19)):
@@ -329,15 +382,24 @@ def verify_unified_syllabus() -> None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--chapters', help='Publish only these checked chapters, e.g. 4,5,6,7')
+    args = parser.parse_args()
+    chapters = [int(n) for n in args.chapters.split(',')] if args.chapters else None
+    if chapters is not None and (len(set(chapters)) != len(chapters) or any(n not in CHAPTER_TITLES for n in chapters)):
+        raise ValueError('Chapter list must contain unique numbers 1-15')
     if not SOURCE_ROOT.exists():
         raise FileNotFoundError(f"source root not found: {SOURCE_ROOT}")
     verify_source_outline()
     verify_unified_syllabus()
-    remove_generated_dirs()
-    copy_chapters()
+    remove_generated_dirs(chapters)
+    copy_practice_packages(chapters)
+    copy_chapters(chapters)
     copy_support_files()
     copy_homepage_cover()
     write_text(DOCS_ROOT / "index.md", build_homepage())
+    for markdown in (DOCS_ROOT / 'teaching').glob('*.md'):
+        write_text(markdown, public_punctuation(read_text(markdown)))
     print(f"Generated MkDocs content from {SOURCE_ROOT} into {DOCS_ROOT}")
 
 

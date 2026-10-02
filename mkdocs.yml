@@ -81,6 +81,7 @@ nav:
       - 第14章 单细胞转录组数据处理与可视化: chapters/chapter-14/index.md
       - 第15章 单细胞进阶、空间组学与综合项目: chapters/chapter-15/index.md
   - 学生学习资源:
+      - 全书学生练习包: teaching/chapter-practice.md
       - 18周学生学习地图: teaching/36-hour-learning-map.md
       - 统一综合项目模板: teaching/unified-project-template.md
       - 第1章课堂任务单: teaching/chapter-1-task-sheet.md

@@ -2,11 +2,16 @@ from __future__ import annotations
 
 import re
 import sys
+import json
 from pathlib import Path
 from urllib.parse import unquote
 
 import yaml
 import pymdownx.superfences  # noqa: F401
+try:
+    from .practice_resources import inspect_package, load_registry
+except ImportError:
+    from practice_resources import inspect_package, load_registry
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -15,7 +20,7 @@ MKDOCS_CONFIG = REPO_ROOT / "mkdocs.yml"
 CHAPTER_RANGE = range(1, 16)
 IMAGE_PATTERN = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 FORBIDDEN_LEGACY_TERMS = ("拓展线", "双轨项目", "NGS拓展", "表格项目", "NGS项目")
-FORBIDDEN_PUBLIC_SUFFIXES = {".zip", ".log"}
+FORBIDDEN_PUBLIC_SUFFIXES = {".log"}
 FORBIDDEN_TEACHER_PAGES = {
     "36-hour-syllabus.md",
     "18-week-teacher-plan.md",
@@ -180,6 +185,7 @@ def validate_no_teacher_only_support_files() -> None:
 
 
 def validate_no_restricted_or_sensitive_content() -> None:
+    validate_practice_packages()
     forbidden_files = [
         path.relative_to(REPO_ROOT).as_posix()
         for path in DOCS_ROOT.rglob("*")
@@ -200,6 +206,37 @@ def validate_no_restricted_or_sensitive_content() -> None:
         for label, pattern in SENSITIVE_PATTERNS.items():
             if pattern.search(text):
                 fail(f"{label} found in {path.relative_to(REPO_ROOT)}")
+
+
+def validate_practice_packages() -> None:
+    registry = load_registry(DOCS_ROOT / 'downloads/registry.json')
+    registrations = registry['packages']
+    chapters = [p['chapter'] for p in registrations]
+    if len(set(chapters)) != len(chapters) or any(n not in CHAPTER_RANGE for n in chapters):
+        fail('Practice registry must use unique chapter numbers 1-15')
+    approved = set()
+    for package in registrations:
+        expected = f'chapter-{package["chapter"]:02d}-practice.zip'
+        if package['file'] != expected:
+            fail(f'Unexpected practice filename: {package["file"]}')
+        path = DOCS_ROOT / 'downloads' / expected
+        if not path.is_file():
+            fail(f'Missing registered practice archive: {expected}')
+        try:
+            inspect_package(path, package, SENSITIVE_PATTERNS)
+        except (ValueError, KeyError, UnicodeError) as error:
+            fail(f'Invalid student package {expected}: {error}')
+        approved.add(path.resolve())
+    for path in DOCS_ROOT.rglob('*.zip'):
+        if path.resolve() not in approved:
+            fail(f'Unregistered ZIP must not be published: {path.relative_to(REPO_ROOT)}')
+    for path in DOCS_ROOT.rglob('*.md'):
+        for target in re.findall(r'\[[^\]]*\]\(([^)]+\.zip)\)', read_text(path)):
+            if target.startswith(('https://', 'http://')):
+                continue
+            resolved = (path.parent / unquote(target)).resolve()
+            if resolved not in approved:
+                fail(f'Unregistered download link in {path.relative_to(REPO_ROOT)}: {target}')
 
 
 def main() -> None:

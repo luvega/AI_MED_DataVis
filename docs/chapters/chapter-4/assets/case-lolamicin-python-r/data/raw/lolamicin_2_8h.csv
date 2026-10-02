@@ -1,0 +1,7 @@
+﻿treatment,time_h,repeat_column_index,value,unit,replicate_definition,source_sheet,source_cell
+Lolamicin (4X MIC),2,1,6000,CFU/mL,biological triplicate per figure legend,ED Fig. 3a,E3
+Lolamicin (4X MIC),2,2,18000,CFU/mL,biological triplicate per figure legend,ED Fig. 3a,F3
+Lolamicin (4X MIC),2,3,51000,CFU/mL,biological triplicate per figure legend,ED Fig. 3a,G3
+Lolamicin (4X MIC),8,1,200,CFU/mL,biological triplicate per figure legend,ED Fig. 3a,E5
+Lolamicin (4X MIC),8,2,5500,CFU/mL,biological triplicate per figure legend,ED Fig. 3a,F5
+Lolamicin (4X MIC),8,3,100,CFU/mL,biological triplicate per figure legend,ED Fig. 3a,G5

@@ -1,10 +1,14 @@
 # 第5章 数据读取、数据字典与数据质量
 
-文件能够打开，不等于已经读对。一列本来是编号，可能被转换成数字；空白可能被当成0；中文读取警告可能被忽略，只留下不完整的表。后面的统计再精细，也无法自动修复这些前提错误。
+接到一份记录表，先确认它保存了哪些对象，再选择读取方式。编号需要保留原来的文字，数值需要对应单位，空白需要有明确含义。读入后的行数、列名和原文都核对清楚，后续统计才有稳定的输入。
 
-本章完成一项具体工作：把一份记录读进来，说明每个字段，识别需要回查的问题，并保留处理过程。我们暂时不比较谁猜得准，不计算群体智慧，也不提前进入第六章的分组统计和探索性图表。
+本章完成一项具体工作：把一份记录读进来，说明每个字段，识别需要回查的问题，并保留处理过程。下一章再根据已经核验的记录进行整形、分组汇总和作图。
 
 接着第四章的猜糖豆情境，假设现在要接收大家填写的答案。有人用“粒”，有人用“千粒”，有的格子空着，同一条回答还可能在导出时保存了两遍。处理这些记录，需要先看清原文，再决定怎样转换、保留或回查。本章的[数据质量练习包](assets/case-THU-DA-L02-C01-A02/README.md)为此编写了14条记录，逐项练习单位、缺失和重复检查。这是独立于第四章五行表的另一份教学数据，未提供糖豆真值。
+
+![第5章教学流程与关系](assets/chapter-5-reading-quality-flow.png)
+
+读取时先核对路径、编码与工作表，再核对行列和字典。缺失、负值与重复候选分别记录，导出后回读检查。
 
 ## 5.1 CSV、Excel 与常见编码问题
 
@@ -18,13 +22,13 @@ CSV是用分隔符组织字段的文本文件；Excel工作簿可以有多个工
 
 ### 先保留原文，再解释类型
 
-以下代码的工作目录为本章练习包根目录，即能看到`data/`、`python/`和`r/`的目录。先使用第二章的方法确认当前位置，再运行。
+以下代码的工作目录为本章练习包根目录，即能看到`data/`、`scripts/`和`outputs/`的目录。先使用第二章的方法确认当前位置，再运行。
 
 ```python
 from pathlib import Path
 import pandas as pd
 
-source = Path("data/guesses_raw.csv")
+source = Path("data/raw/guesses_raw.csv")
 assert source.is_file(), "请先核对工作目录与输入路径"
 raw = pd.read_csv(source, encoding="utf-8", dtype=str, keep_default_na=False)
 print(raw.shape)
@@ -37,7 +41,7 @@ options(warn=2)
 if (.Platform$OS.type == "windows" && !l10n_info()[["UTF-8"]]) {
   invisible(Sys.setlocale("LC_CTYPE", "English_United States.utf8"))
 }
-source <- "data/guesses_raw.csv"
+source <- "data/raw/guesses_raw.csv"
 stopifnot(file.exists(source))
 raw <- read.csv(source, fileEncoding="UTF-8", colClasses="character",
                 na.strings=NULL, check.names=FALSE)
@@ -59,19 +63,19 @@ print(head(raw))
 CSV的编码由本练习说明给定。Excel则明确选择工作表，并要求字段以文本读入：
 
 ```python
-other = pd.read_csv("data/guesses_gb18030.csv", encoding="gb18030",
+other = pd.read_csv("data/raw/guesses_gb18030.csv", encoding="gb18030",
                     dtype=str, keep_default_na=False)
-excel = pd.read_excel("data/guesses.xlsx", sheet_name="guesses",
+excel = pd.read_excel("data/raw/guesses.xlsx", sheet_name="guesses",
                       dtype=str, keep_default_na=False)
 pd.testing.assert_frame_equal(raw, other)
 pd.testing.assert_frame_equal(raw, excel)
 ```
 
 ```r
-other <- read.csv("data/guesses_gb18030.csv", fileEncoding="GB18030",
+other <- read.csv("data/raw/guesses_gb18030.csv", fileEncoding="GB18030",
                   colClasses="character", na.strings=NULL, check.names=FALSE)
 stopifnot(requireNamespace("readxl", quietly=TRUE))
-excel <- as.data.frame(readxl::read_excel("data/guesses.xlsx",
+excel <- as.data.frame(readxl::read_excel("data/raw/guesses.xlsx",
                        sheet="guesses", col_types="text"))
 excel[is.na(excel)] <- ""
 stopifnot(identical(raw, other), identical(raw, excel))
@@ -81,11 +85,42 @@ Python读取Excel需要openpyxl，R使用readxl；未配置时将该练习记为
 
 上面的比较没有输出差异，才说明这三份指定输入在当前读取方式下相同。真实Excel中的公式、日期和显示格式可能带来其他问题，不能据此宣称任意Excel转CSV都不会丢失信息。[pandas读取参数](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)、[R文本读取参数](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html)及[readxl文档](https://readxl.tidyverse.org/reference/read_excel.html)可用于查阅具体行为。
 
+### 从实验记录核对CSV与Excel
+
+第四课已经计算过Lolamicin三条活菌计数。现在接收同一研究的文件，工作从算术转到输入核对。练习包中的`lolamicin_2_8h.csv`保存2小时和8小时各三条记录，共6行8列；`lolamicin_ecoli_timekill.csv`保存三个处理、四个时间的36条记录。每一行带有CFU/mL单位、重复列序号和源单元格。先打开字典，认清两份表的范围，再读取六行表。
+
+```python
+from pathlib import Path
+import pandas as pd
+
+input_path = Path("data/raw/lolamicin_2_8h.csv")
+experiment = pd.read_csv(input_path, encoding="utf-8",
+                         dtype={"treatment": "string"})
+print(experiment.shape)
+print(experiment[["treatment", "time_h", "value", "source_cell"]])
+```
+
+`Path`保存输入位置，`read_csv`按指定编码读表。`dtype`只对处理标签指定文本类型，其余字段仍按输入内容识别。`experiment.shape`应显示`(6, 8)`，第一项是记录数，第二项是字段数。最后一行选出四列供肉眼核对，原对象的八列仍然保留。看2小时三条记录时，应找到6000、18000、51000和E3、F3、G3；这些定位信息把程序中的数值接回作者源表。
+
+Excel工作簿首先是一组工作表。练习工作簿第一张是说明页，数据位于`long_records`。直接读取第一张会读到文字说明，所以先列出工作表，再明确选择。
+
+```python
+book = pd.ExcelFile("data/raw/lolamicin_tables.xlsx")
+print(book.sheet_names)
+experiment_excel = pd.read_excel(book, sheet_name="long_records")
+pd.testing.assert_frame_equal(experiment, experiment_excel,
+                              check_dtype=False)
+```
+
+工作表顺序应为`说明`、`long_records`、`wide_values`、`source_map`。`sheet_name`让这次读取指向六行记录。最后的检查逐项比较列、行和内容；CSV与Excel的类型表示可以不同，故在这次核对中关闭类型完全一致要求，数值与文本仍须一致。后面还要按字典核对类型，这一步只解决两份指定格式副本的内容对应。
+
+完整脚本`01_read_files.py`还读取UTF-8与GB18030宽表副本，再把六行记录导出并回读。每次变化都使用同一份数据内容，学生可以把文件格式、读取参数和对象结果分别检查。
+
 ## 5.2 工作目录、文件路径与原始数据保护
 
 ### 相对路径从哪里开始
 
-`data/guesses_raw.csv`是相对路径，它从当前工作目录出发，不一定从脚本所在目录出发。编辑器打开了文件、终端进入了项目，以及脚本自身存放的位置，是三件不同的事。
+`data/raw/guesses_raw.csv`是相对路径，它从当前工作目录出发，不一定从脚本所在目录出发。编辑器打开了文件、终端进入了项目，以及脚本自身存放的位置，是三件不同的事。
 
 ```python
 print(Path.cwd())
@@ -103,7 +138,7 @@ print(normalizePath(source, mustWork=TRUE))
 
 ### 原始记录与派生结果分开
 
-本练习的`data/`是只读输入区，`results/python/`和`results/r/`分别保存两种语言的输出。将材料放入自己的项目时，可对应第二章的`data/raw/`与`data/processed/`结构。
+本练习的`data/raw/`保存输入，`outputs/guesses-python/`和`outputs/guesses-r/`分别保存两种语言的输出。输入与运行产物分开放置，便于重新运行和核对。
 
 清洗过程中，保留原始文字、记录号和处理理由。发现“1.2千粒”可以换算时，应在新列保存1200粒，而不是覆盖原文；发现“盒”的容量不明时，应保留问题记录，不能自行换成粒。
 
@@ -138,6 +173,14 @@ print(normalizePath(source, mustWork=TRUE))
 迁移到药学表时，可以问：时间从哪一事件开始计，剂量单位是什么，测量来自哪个单元，低于检测限怎样编码？这些信息不能由AI根据列名猜出。能够生成整齐字典，不代表其中解释已经有依据。
 
 新增字段也要有字典。例如`estimate_grains`表示换算后的粒数，`review_high`表示触发人工回查规则，后者不是“数据错误”或“统计异常”标签。
+
+### 换成库存表，字典要随任务改变
+
+实验记录中的`value`需要CFU/mL和测量条件，库存表中的`Stock_Qty`需要数量口径与记录定义。本章另提供25行库存教学构造数据，药品标签和供应商均作为练习字段。目标先定为“按剂型汇总可用库存数量”，因此库存缺失或负值会影响当前汇总，单价缺失则保留在问题清单中，仍能参与库存数量计算。
+
+`Drug_ID`标识一条记录，`Drug_Name`标识药品标签。两条记录标签相同，还可能来自不同批次。当前表缺少正式批次号，D002和D016在药名、库存、效期和供应商四列相同，我们把它们列为重复候选，保留两条记录并要求回查。这个任务和糖豆r10的确认导出副本处理不同，原因来自记录定义，而非软件函数的名称。
+
+字典至少增加数量口径、字段空白含义、重复判断所需字段、当前任务的纳入规则四项。若后续目标改为计算库存金额，单价就成为必要字段，要形成另一份分析表并重新记录纳入范围。
 
 ## 5.4 数据类型识别与单位检查
 
@@ -206,6 +249,40 @@ print(raw[!numeric_text, c("record_id", "estimate"), drop=FALSE])
 
 完成检查后，把动作写具体：保留并标记、按明确规则转换、暂存待核查、去除已确认副本，或停止流程。不要将这些动作全部写成含糊的“已清洗”。
 
+### 分别记录缺失、负值和重复候选
+
+先用第4章的逻辑值创建几个条件，再查看各条件选中了哪些记录。库存先以文本读取，空白原样保留。`copy()`建立派生对象，原表继续留在`inventory_raw`。
+
+```python
+inventory_raw = pd.read_csv("data/raw/inventory_teaching.csv",
+                            encoding="utf-8-sig", dtype=str,
+                            keep_default_na=False)
+inventory = inventory_raw.copy()
+inventory["stock_num"] = pd.to_numeric(inventory["Stock_Qty"],
+                                       errors="coerce")
+missing_stock = inventory["Stock_Qty"].eq("")
+negative_stock = inventory["stock_num"].lt(0)
+duplicate_keys = ["Drug_Name", "Stock_Qty", "Expiry_Date", "Supplier"]
+duplicate_candidate = inventory.duplicated(duplicate_keys, keep=False)
+print(inventory.loc[missing_stock, "Drug_ID"].tolist())
+print(inventory.loc[negative_stock, "Drug_ID"].tolist())
+print(inventory.loc[duplicate_candidate, "Drug_ID"].tolist())
+```
+
+三次输出应分别为`['D017']`、`['D018']`、`['D002', 'D016']`。`eq("")`检查原文字段为空；`lt(0)`检查转换后的数值小于0；`duplicated`依指定四列找相同内容，`keep=False`让候选组中的每条记录都被标记。输出中的编号使我们能够回到原行，解释每一个问题。
+
+`pd.to_numeric`遇到无法转换的原文时生成缺失标记，因此完整脚本还单列“非空却无法数值化”的情况。当前输入的库存空白与负值已经分别定位。选择库存分析记录时，用“数值存在并且非负”写清条件。
+
+```python
+stock_analysis = inventory.loc[
+    inventory["stock_num"].notna() & inventory["stock_num"].ge(0)
+].copy()
+print(len(inventory), len(stock_analysis))
+print(stock_analysis["stock_num"].sum())
+```
+
+输出为25、23及25335。被暂时排除的只有D017和D018，D019的单价空白不改变这个任务的库存汇总。D002和D016保留并带有候选标记。0满足非负条件，独立练习要求加入0后再核对，避免把空白和0混在一起。后续第6章的库存统计与图使用这同一份23行分析表。
+
 ## 5.6 清洗记录与样本数变化追踪
 
 ### 哪一步改变了多少记录
@@ -231,11 +308,11 @@ print(raw[!numeric_text, c("record_id", "estimate"), drop=FALSE])
 在练习包根目录执行：
 
 ```powershell
-python python/quality.py
-Rscript r/quality.R
+python scripts/03_guesses_quality.py
+Rscript scripts/03_guesses_quality.R
 ```
 
-[Python完整版本](assets/case-THU-DA-L02-C01-A02/python/quality.py)和[R完整版本](assets/case-THU-DA-L02-C01-A02/r/quality.R)使用相同输入、顺序和规则。分别生成数值表、问题日志、待核查表、流向表与处理阶段图，不修改输入。两种语言图像的外观可以不同，但记录ID、处理类别、数量和数值应一致。
+学生包中的两个完整版本使用相同输入、顺序和规则，分别生成数值表、问题日志、待核查表、流向表与处理阶段图。两种语言图像的外观可以不同，记录ID、处理类别、数量和数值应一致。原有[Python版本](assets/case-THU-DA-L02-C01-A02/python/quality.py)和[R版本](assets/case-THU-DA-L02-C01-A02/r/quality.R)保留为案例单独材料；本章统一练习使用上述章级包路径。
 
 `issues.csv`的原始序号从表头后的第一条记录开始；`quarantine.csv`保留原字段与暂不纳入的原因。当前脚本按约定顺序记录首个阻止数值化的原因，不代表一条记录最多只有一个问题。数据情况更复杂时，应扩展检查，而不是隐瞒后续问题。
 
@@ -243,7 +320,7 @@ Rscript r/quality.R
 
 ### AI 局部协作与独立任务
 
-本章开始允许AI协助局部代码。一个适当请求是：给它真实列名和非负规则，请它生成“列出负值记录”的小片段；要求保留原表，并用已知小例检查。是否排除、回查还是保留，仍由你依据字典决定，不交给AI猜测。
+可以把真实列名、非负规则和预期输出写成一次局部任务，请AI协助解释或修改“列出负值记录”的片段。用D018核对输出，再说明这一条为何影响当前库存任务。
 
 完成演示后，独立提交字典、逐条质量判断、两种语言的运行记录，以及以下条件变化题。不要先让AI给出答案：
 
@@ -270,3 +347,14 @@ G --> D
 ```
 
 完成这些检查之后，才具备进入下一章的基础。第六章将进一步整理数据形状、进行分组汇总并观察分布；遇到新问题时，仍可以回到字典和清洗记录修订规则。
+
+## 本章总结与练习入口
+
+本章交付的是可解释的输入表、字段字典、质量问题和数量变化记录。糖豆例从14条记录到13条确认去重记录，再形成9条可数值化记录；库存任务从25条到23条，缺失与负值分别列出，候选重复保留回查。Lolamicin记录通过处理、时间、单位和源单元格接回研究数据。记录数、观察对象和独立重复是不同层次，后续分析按记录机制确定比较单位。构造表用于训练处理方法，研究数据的专业解释依原实验条件和设计形成。AI协助局部代码与文字说明，规则、单位、纳入范围和结果解释由学习者逐项核对。
+
+[打开本章练习说明](../../teaching/chapter-practice.md#chapter-5)。学生包包含上述数据、完整脚本、Python/R质量对照和条件变化任务。完成后保存实际输出、字典和简短学习记录，进入第6章整形与汇总。
+
+
+## 本章练习包
+
+[下载第5章学生练习包](../../downloads/chapter-05-practice.zip) · [查看全书练习包](../../teaching/chapter-practice.md)

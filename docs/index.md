@@ -57,9 +57,9 @@ AI 可以解释报错、整理任务说明、生成局部代码并提出核验�
 
 [进入第2章：WorkBuddy 工作空间与结果核验](chapters/chapter-2/index.md)
 
-## 贯穿案例与使用边界
+## 案例怎样衔接
 
-Bioconductor `airway` 是全书的 bulk RNA-seq 贯穿案例。该数据包含8个人气道平滑肌细胞样本，来自4个细胞系，每个细胞系包含地塞米松处理与未处理样本。教材用它连接 metadata、计数矩阵、质量检查、标准化、PCA、热图、差异表达和富集审阅。
+猜糖豆与Lolamicin案例连接对象、读取、质量检查、整形、汇总和图表；释放实验连接环境操作与AI任务说明。统计与模型章节使用明确标识的教学表，练习计算、诊断与评估。Bioconductor `airway` 集中用于第12章RNA-seq数据链条，连接计数矩阵、样本信息、实验设计和差异结果。
 
 | 案例类型 | 在书中的用途 | 不能据此推出 |
 | --- | --- | --- |
@@ -117,6 +117,7 @@ Bioconductor `airway` 是全书的 bulk RNA-seq 贯穿案例。该数据包含8�
 | 材料 | 页面 |
 | --- | --- |
 | 18周学生学习地图 | [查看](teaching/36-hour-learning-map.md) |
+| 全书学生练习包 | [下载索引](teaching/chapter-practice.md) |
 | 统一综合项目模板 | [查看](teaching/unified-project-template.md) |
 | 第1章课堂任务单 | [查看](teaching/chapter-1-task-sheet.md) |
 | 术语表 | [查看](references/terminology.md) |
