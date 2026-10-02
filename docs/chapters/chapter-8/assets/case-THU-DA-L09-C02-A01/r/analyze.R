@@ -1,0 +1,16 @@
+options(digits=17)
+script <- sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)[1])
+P <- normalizePath(file.path(dirname(script),".."),winslash="/")
+for (f in c("figures","expected")) dir.create(file.path(P,f),showWarnings=FALSE)
+d <- read.csv(file.path(P,"data/sleep.csv"),stringsAsFactors=FALSE)
+stopifnot(!anyNA(d))
+a <- d[d$group==1,]; b <- d[d$group==2,]; a <- a[order(a$ID),]; b <- b[order(b$ID),]
+stopifnot(nrow(a)==10,all(a$ID==b$ID))
+v <- b$extra-a$extra; fit <- t.test(v,mu=0)
+m <- c(n=length(v),mean_diff=mean(v),sd_diff=sd(v),se=sd(v)/sqrt(length(v)),t=unname(fit$statistic),p=fit$p.value,ci_low=fit$conf.int[1],ci_high=fit$conf.int[2])
+draw <- function() {matplot(1:2,t(cbind(a$extra,b$extra)),type="b",lty=1,xlab="Historical condition",ylab="Extra sleep (hours)",main="Same ID connected");axis(1,at=1:2)}
+write.csv(data.frame(metric=names(m),value=as.numeric(m)),file.path(P,"expected/r.csv"),row.names=FALSE)
+png(file.path(P,"figures/result-r.png"),width=1024,height=672,res=160)
+draw()
+invisible(dev.off())
+print(m)

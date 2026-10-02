@@ -2,7 +2,7 @@
 
 下载对应章节的ZIP，解压后先读 `README.md`。输入保存在 `data/`，运行结果写入 `outputs/`。每个包的 `manifest.json` 列出版本、运行入口、编码与文件校验值。
 
-已发布 7 / 15 章；正文与练习包按批同步更新。
+已发布 10 / 15 章；正文与练习包按批同步更新。
 
 | 章节 | 练习包 | 版本 | 大小 |
 | --- | --- | --- | --- |
@@ -13,9 +13,9 @@
 | [第5章 数据读取、数据字典与数据质量](../chapters/chapter-5/index.md) | [下载ZIP](../downloads/chapter-05-practice.zip) | 2026-10-02 | 26 KB |
 | [第6章 数据整形、描述统计与探索性可视化](../chapters/chapter-6/index.md) | [下载ZIP](../downloads/chapter-06-practice.zip) | 2026-10-02 | 20 KB |
 | [第7章 科研图表规范与 SCI 图表表达](../chapters/chapter-7/index.md) | [下载ZIP](../downloads/chapter-07-practice.zip) | 2026-10-02 | 112 KB |
-| [第8章 统计推断与组间比较](../chapters/chapter-8/index.md) | 本批尚未发布 | 待发布 | 待发布 |
-| [第9章 相关、回归与分类模型](../chapters/chapter-9/index.md) | 本批尚未发布 | 待发布 | 待发布 |
-| [第10章 模型评估、特征选择与可解释性](../chapters/chapter-10/index.md) | 本批尚未发布 | 待发布 | 待发布 |
+| [第8章 统计推断与组间比较](../chapters/chapter-8/index.md) | [下载ZIP](../downloads/chapter-08-practice.zip) | 2026-10-02 | 16 KB |
+| [第9章 相关、回归与分类模型](../chapters/chapter-9/index.md) | [下载ZIP](../downloads/chapter-09-practice.zip) | 2026-10-02 | 11 KB |
+| [第10章 模型评估、特征选择与可解释性](../chapters/chapter-10/index.md) | [下载ZIP](../downloads/chapter-10-practice.zip) | 2026-10-02 | 25 KB |
 | [第11章 高维矩阵、PCA、聚类与热图](../chapters/chapter-11/index.md) | 本批尚未发布 | 待发布 | 待发布 |
 | [第12章 RNA-seq 数据链条与差异表达分析](../chapters/chapter-12/index.md) | 本批尚未发布 | 待发布 | 待发布 |
 | [第13章 公共数据库、序列数据与医药大数据智能分析](../chapters/chapter-13/index.md) | 本批尚未发布 | 待发布 | 待发布 |
@@ -154,3 +154,60 @@ Rscript scripts/03_lolamicin_plot.R
 01对应7.1-7.3，写出未加权分布图、分母核对表及作图数据。02对应7.4-7.5，输出36条原始点图、12组汇总和2小时的SD/SEM比较图。03从同一36行CSV重新汇总，提供R对照。各入口可独立运行，均写入outputs。
 
 打开PNG查看预览，再打开SVG或PDF检查轴、图例和裁切。填写design_card.md、records.md，完成exercises.md中的局部修改。下载包中的示例核对点用于演示检查，独立练习由你先预测再完成。
+
+<a id="chapter-8"></a>
+
+## 第8章开始说明
+
+# 第8章 统计推断与组间比较练习包
+
+本包对应8.1、8.5。用24行ALT/AST教学表计算均值区间与Welch均值差，随后核对70种茶杯分配、10人睡眠配对及A/B汇总。
+
+解压后进入本目录，在终端按顺序运行下面的演示。Python需要pandas、numpy、scipy、matplotlib、scikit-learn、statsmodels；第11章另需seaborn。R脚本所需包见脚本开头。包内数据均可离线读取；安装软件和依赖需要在上课前完成。
+
+```text
+python scripts/01_inference.py
+Rscript scripts/02_inference.R
+```
+
+脚本按自身位置查找输入，可从其他目录调用。所有新结果写入outputs；data/raw保留原输入。先预测关键结果，再运行核对，最后按exercises.md修改一个条件。文件名出现中文时保留UTF-8；CSV输入编码见bundle.json。独立练习没有附完整答案。
+
+正文中的短代码用于逐步讲解，scripts中的文件给出完整演示。记录数据、参数和实际输出，使用records.md整理自己的运行过程。
+
+<a id="chapter-9"></a>
+
+## 第9章开始说明
+
+# 第9章 相关、回归与分类模型练习包
+
+本包对应9.1、9.5。24行表用于散点、分层相关、线性模型和残差；独立200行构造表用于逻辑回归及三个阈值的分类结果。
+
+解压后进入本目录，在终端按顺序运行下面的演示。Python需要pandas、numpy、scipy、matplotlib、scikit-learn、statsmodels；第11章另需seaborn。R脚本所需包见脚本开头。包内数据均可离线读取；安装软件和依赖需要在上课前完成。
+
+```text
+python scripts/01_models.py
+Rscript scripts/02_models.R
+```
+
+脚本按自身位置查找输入，可从其他目录调用。所有新结果写入outputs；data/raw保留原输入。先预测关键结果，再运行核对，最后按exercises.md修改一个条件。文件名出现中文时保留UTF-8；CSV输入编码见bundle.json。独立练习没有附完整答案。
+
+正文中的短代码用于逐步讲解，scripts中的文件给出完整演示。记录数据、参数和实际输出，使用records.md整理自己的运行过程。
+
+<a id="chapter-10"></a>
+
+## 第10章开始说明
+
+# 第10章 模型评估、特征选择与可解释性练习包
+
+本包对应10.1、10.6。160行构造表、共享训练/测试与五折记录用于评估；320行重复测量表用于定位患者跨集合问题。
+
+解压后进入本目录，在终端按顺序运行下面的演示。Python需要pandas、numpy、scipy、matplotlib、scikit-learn、statsmodels；第11章另需seaborn。R脚本所需包见脚本开头。包内数据均可离线读取；安装软件和依赖需要在上课前完成。
+
+```text
+python scripts/01_evaluation.py
+Rscript scripts/02_evaluation.R
+```
+
+脚本按自身位置查找输入，可从其他目录调用。所有新结果写入outputs；data/raw保留原输入。先预测关键结果，再运行核对，最后按exercises.md修改一个条件。文件名出现中文时保留UTF-8；CSV输入编码见bundle.json。独立练习没有附完整答案。
+
+正文中的短代码用于逐步讲解，scripts中的文件给出完整演示。记录数据、参数和实际输出，使用records.md整理自己的运行过程。

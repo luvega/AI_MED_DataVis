@@ -57,8 +57,8 @@
       "title": "数据读取、数据字典与数据质量",
       "version": "2026-10-02",
       "file": "chapter-05-practice.zip",
-      "sha256": "23a0857c5c1ccaf27f5791eea825dd02ffe547cba793a4ca7b08c25f34b1d82b",
-      "size": 26494,
+      "sha256": "5694a5ee079271d293999471c27d1841f1b17cac26f031dba75c732fb12fdebb",
+      "size": 26455,
       "entrypoints": [
         "scripts/01_read_files.py",
         "scripts/02_inventory_quality.py",
@@ -71,8 +71,8 @@
       "title": "数据整形、描述统计与探索性可视化",
       "version": "2026-10-02",
       "file": "chapter-06-practice.zip",
-      "sha256": "f673a0ddc632c0dd3f46b8d4c4994cdbe2e53ebb0fe29fa5394965285142d6a9",
-      "size": 20305,
+      "sha256": "fefe00a91045ab4be440289e95f3c97078a5b622a552e5bc6ee88cea2a864af3",
+      "size": 20478,
       "entrypoints": [
         "scripts/01_reshape_summary.py",
         "scripts/02_inventory_summary.py",
@@ -91,6 +91,42 @@
         "scripts/01_nhanes_plot.py",
         "scripts/02_lolamicin_plot.py",
         "scripts/03_lolamicin_plot.R"
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "统计推断与组间比较",
+      "version": "2026-10-02",
+      "file": "chapter-08-practice.zip",
+      "sha256": "5e4b461560fc7ae19f901c29e265bbeebeda16836c0aa053cb14236f1b4868e9",
+      "size": 16730,
+      "entrypoints": [
+        "scripts/01_inference.py",
+        "scripts/02_inference.R"
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "相关、回归与分类模型",
+      "version": "2026-10-02",
+      "file": "chapter-09-practice.zip",
+      "sha256": "103acc7b7efd504ea4f7612e2b2fd51f1078c737b50b124ee587a1e7597d5200",
+      "size": 11734,
+      "entrypoints": [
+        "scripts/01_models.py",
+        "scripts/02_models.R"
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "模型评估、特征选择与可解释性",
+      "version": "2026-10-02",
+      "file": "chapter-10-practice.zip",
+      "sha256": "1ff58895d351f804d4952bf94ec742d4df40d2ab1062e0100f1cd99a606d5f46",
+      "size": 25221,
+      "entrypoints": [
+        "scripts/01_evaluation.py",
+        "scripts/02_evaluation.R"
       ]
     }
   ]

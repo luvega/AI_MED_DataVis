@@ -78,7 +78,7 @@ def read_text(path: Path) -> str:
 
 def write_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content.replace("\r\n", "\n"), encoding="utf-8", newline="\n")
+    path.write_text(content.replace("\r\n", "\n").rstrip("\n") + "\n", encoding="utf-8", newline="\n")
 
 
 def public_punctuation(content: str) -> str:
@@ -96,6 +96,10 @@ def copy_file(source: Path, target: Path) -> None:
 def student_facing_support_content(content: str) -> str:
     public = re.split(r"^## 教师提示\s*$", content, maxsplit=1, flags=re.MULTILINE)[0].rstrip() + "\n"
     public = re.sub(r'\(\.\./chapters/chapter-(\d+)/practice/README\.md\)', r'(chapter-practice.md#chapter-\1)', public)
+    public = public.replace(
+        '第五课按[完整练习说明](../outputs/2026-10-01-第五课完整内容重整/学生练习/开始练习.md)操作。',
+        '第五课先完成[第5章读取与质量练习](chapter-practice.md#chapter-5)，再进入[第6章整形与连接练习](chapter-practice.md#chapter-6)。',
+    )
     return public
 
 
@@ -173,6 +177,14 @@ def copy_chapters(chapters: list[int] | None = None) -> None:
             shutil.copytree(assets, target_dir / "assets", dirs_exist_ok=True,
                             ignore=shutil.ignore_patterns('results', 'outputs', '__pycache__', '*.log', '*.zip', '.DS_Store'))
         content = materialize_external_images(body, target_dir, read_text(body))
+        # This student source guide is linked by chapter 12; internal chapter
+        # outlines and teacher notes remain outside the public document tree.
+        for support_name in ("来源拓展.md",):
+            if f'({support_name})' in content:
+                support = source_dir / support_name
+                if not support.is_file():
+                    raise FileNotFoundError(f'Linked student source guide missing: {support}')
+                write_text(target_dir / support_name, read_text(support))
         # The complete practice directory is in the verified ZIP. Online links
         # lead to the same chapter entry in the download index.
         content = content.replace('(practice/README.md)', f'(../../teaching/chapter-practice.md#chapter-{chapter_number})')

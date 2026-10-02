@@ -392,21 +392,22 @@ inventory_raw = pd.read_csv("data/raw/inventory_teaching.csv",
 stock = pd.to_numeric(inventory_raw["Stock_Qty"], errors="coerce")
 inventory_analysis = inventory_raw.loc[stock.notna() & stock.ge(0)].copy()
 inventory_analysis["stock_num"] = stock.loc[inventory_analysis.index]
-form_summary = inventory_analysis.groupby("Dosage_Form", as_index=False).agg(
+inventory_analysis["dosage_form_clean"] = inventory_analysis["Dosage_Form"].str.strip()
+summary = inventory_analysis.groupby("dosage_form_clean", as_index=False).agg(
     records=("Drug_ID", "size"), stock_total=("stock_num", "sum"),
     mean_stock=("stock_num", "mean"), median_stock=("stock_num", "median")
 )
-print(form_summary["records"].sum())
-print(form_summary["stock_total"].sum())
+print(summary["records"].sum())
+print(summary["stock_total"].sum())
 ```
 
 两项输出为23和25335。`size`数每组记录；`sum`将库存数相加。加总后的分组记录数必须回到23，库存总数回到25335。由于表中不同药品包装单位未统一，这个构造任务训练分组与核对动作，解释各药品的实际可用量还需要补齐包装字典。
 
-配套`02_inventory_summary.py`直接使用`form_summary`作图并保存表格。打开图后，按结果表检查柱高，再改变一项纳入条件观察表和图怎样共同变化。这样一次局部修改能同时检查数据处理、统计和绘图接口。
+配套`02_inventory_summary.py`先去除剂型字段两端空格，再用`summary`作图并保存表格。打开图后，按结果表检查柱高，再改变一项纳入条件观察表和图怎样共同变化。这样一次局部修改能同时检查数据处理、统计和绘图接口。
 
 ### 临床指标描述统计
 
-临床指标示例用于训练描述统计表，不用于医学判断。`ALT` 和 `AST` 的单位、参考范围、采样时间和检测方法都需要数据字典或数据提供者说明。
+沿用6.1的指标表，各指标分别汇总。数据字典保存字段含义与单位信息，样本分组继续按`sample_id`对应。
 
 ```python
 clinical_summary = (
@@ -757,35 +758,9 @@ print(drug_name_counts)
 | 4 | 汇总表和指标表 | 探索性图表 | 图表设计规范卡和图注 |
 | 5 | 文本字段 | 名称清理和关键词表 | 需人工确认项 |
 
-### 本章 AI 任务说明书示例
+### 局部代码解释练习
 
-```text
-目标：
-请根据我提供的字段，生成第6章“分组汇总与探索性图表”的 Python 局部代码。
-
-上下文：
-- 数据表是一张教学用药品销售摘录表。
-- 字段包括 sale_date、card_id、drug_code、drug_name、quantity、receivable、actual。
-- 一行代表一笔交易。
-
-约束：
-- 不猜字段单位。
-- 不解释药物疗效、患者需求或临床风险。
-- 不删除异常值，只生成标记和回查清单。
-- 所有图注必须说明这是教学示例。
-
-验证：
-- 输出读入后行列数。
-- 输出日期转换失败数。
-- 输出连接前后行数和未匹配记录数。
-- 输出每张图的数据来源和分母。
-
-输出：
-1. 分组汇总代码。
-2. 探索性图表代码。
-3. 图表设计规范卡表。
-4. 需人工确认清单。
-```
+把已经运行的连接片段、实际列名和报错交给AI，请它解释`validate="many_to_one"`怎样检查分类表。再在自己的工作副本中增加一个重复编码，先预测会发生什么，再运行核对；恢复副本后删去一个分类键，记录未匹配条目和连接行数。
 
 ## 知识结构
 

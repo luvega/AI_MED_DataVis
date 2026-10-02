@@ -1,0 +1,17 @@
+options(digits=17)
+script <- sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)[1])
+P <- normalizePath(file.path(dirname(script),".."),winslash="/")
+for (f in c("figures","expected")) dir.create(file.path(P,f),showWarnings=FALSE)
+d <- read.csv(file.path(P,"data/ab.csv"),stringsAsFactors=FALSE)
+stopifnot(!anyNA(d))
+stopifnot(all(d$group==c("A","B")),all(d$n==5000))
+p0 <- d$success[1]/d$n[1];p1 <- d$success[2]/d$n[2];delta <- p1-p0
+se <- sqrt(p0*(1-p0)/d$n[1]+p1*(1-p1)/d$n[2])
+pool <- sum(d$success)/sum(d$n);se0 <- sqrt(pool*(1-pool)*sum(1/d$n));z <- delta/se0
+m <- c(n=sum(d$n),p_A=p0,p_B=p1,difference=delta,relative_change=delta/p0,ci_low=delta-qnorm(.975)*se,ci_high=delta+qnorm(.975)*se,z=z,p=2*pnorm(-abs(z)))
+draw <- function() barplot(c(A=p0,B=p1),ylim=c(0,.35),ylab="Reservation proportion",main="Constructed teaching data")
+write.csv(data.frame(metric=names(m),value=as.numeric(m)),file.path(P,"expected/r.csv"),row.names=FALSE)
+png(file.path(P,"figures/result-r.png"),width=1024,height=672,res=160)
+draw()
+invisible(dev.off())
+print(m)
