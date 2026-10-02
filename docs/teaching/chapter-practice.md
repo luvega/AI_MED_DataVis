@@ -2,7 +2,7 @@
 
 下载对应章节的ZIP，解压后先读 `README.md`。输入保存在 `data/`，运行结果写入 `outputs/`。每个包的 `manifest.json` 列出版本、运行入口、编码与文件校验值。
 
-已发布 13 / 15 章；正文与练习包按批同步更新。
+已发布 15 / 15 章；正文与练习包按批同步更新。
 
 | 章节 | 练习包 | 版本 | 大小 |
 | --- | --- | --- | --- |
@@ -19,8 +19,8 @@
 | [第11章 高维矩阵、PCA、聚类与热图](../chapters/chapter-11/index.md) | [下载ZIP](../downloads/chapter-11-practice.zip) | 2026-10-02 | 866 KB |
 | [第12章 RNA-seq 数据链条与差异表达分析](../chapters/chapter-12/index.md) | [下载ZIP](../downloads/chapter-12-practice.zip) | 2026-10-02 | 1959 KB |
 | [第13章 公共数据库、序列数据与医药大数据智能分析](../chapters/chapter-13/index.md) | [下载ZIP](../downloads/chapter-13-practice.zip) | 2026-10-02 | 10 KB |
-| [第14章 单细胞转录组数据处理与可视化](../chapters/chapter-14/index.md) | 本批尚未发布 | 待发布 | 待发布 |
-| [第15章 单细胞进阶、空间组学与综合项目](../chapters/chapter-15/index.md) | 本批尚未发布 | 待发布 | 待发布 |
+| [第14章 单细胞转录组数据处理与可视化](../chapters/chapter-14/index.md) | [下载ZIP](../downloads/chapter-14-practice.zip) | 2026-10-02 | 27 KB |
+| [第15章 单细胞进阶、空间组学与综合项目](../chapters/chapter-15/index.md) | [下载ZIP](../downloads/chapter-15-practice.zip) | 2026-10-02 | 21 KB |
 
 前期练习以Python为主，R用于已有对照与适合的领域分析。RNA-seq、单细胞和进阶章节在README中区分实际运行入口、轻量练习与大型数据拓展。基础练习使用本地文件。
 
@@ -283,3 +283,47 @@ python scripts/02_map_ids.py
 两个入口只使用Python标准库，按脚本位置寻找文件。运行前手数FASTA记录、read记录与VCF类型，运行后逐项核对 `outputs/format_audit.json`。第二个入口保留成功与未匹配ID，检查查询日期与物种字段。
 
 参考结果可从正文的构造VCF表和ID表核对；独立练习见 `exercises/独立练习.md`。需要拓展时从 `sources/来源.md` 的官方链接自行核验公共记录与许可，再决定是否下载。基础任务没有在线查询和完整测序下载。
+
+<a id="chapter-14"></a>
+
+## 第14章开始说明
+
+# 第14章学生练习：对象、质控规则和参数变化
+
+人骨髓案例仍是正文主案例。本包用SeuratObject公开小对象`pbmc_small`做独立迁移练习，计数为230个基因×80个细胞，不能把它写成人骨髓原对象。计数仅有一个特征子集，缺少完整空液滴、线粒体与供体层信息；另提供明确构造的6行QC表，单独练习规则标记和删行记录。
+
+```powershell
+python scripts/01_object_and_qc.py
+python scripts/02_review_reference.py
+```
+
+Python入口需要pandas、matplotlib；第一项核对实际计数并练习构造QC，第二项重绘已保存坐标和四档resolution结果，不重新生成UMAP。核对材料为data/raw中的既有坐标、cluster计数和marker字段表。运行前预测细胞数及规则变化，运行后打开outputs中的表和图。
+
+具备已安装Seurat环境时运行原生R流程：
+
+```powershell
+Rscript scripts/03_seurat.R
+```
+
+R脚本从本地计数重新建立对象，运行LogNormalize、vst特征选择、PCA、邻接图、四档resolution、UMAP和marker展示，保存真实矩阵与参数输出。需要Seurat、SeuratObject、ggplot2及其正常运行依赖，不会联网安装。骨髓远程对象、OSCA大对象与CellTypist模型未随基础包分发，参见sources中的拓展入口。
+
+修改`--max-mt 15`先预测构造QC保留数，再运行；对实际pbmc_small的resolution变化使用不同输出文件，避免与缓存参考结果混写。完成exercises中的独立任务，填写records模板。
+
+<a id="chapter-15"></a>
+
+## 第15章开始说明
+
+# 第15章学生练习：空间邻接、模态对齐与项目审阅
+
+基础入口使用100个构造spot的10×10网格以及独立构造RNA/ADT标识表，练习空间图、参数变化、顺序对齐和混杂识别。真实Visium、CITE和TCR结果另以2026-07-16已保存小表提供；网格运行不会重新产生这些真实结果。正文仍详细讲解原整合、拟时序、velocity、通讯和多模态案例。
+
+```powershell
+python scripts/01_grid_analysis.py
+python scripts/02_alignment_and_reference.py
+```
+
+需要numpy、pandas、matplotlib，输入全在本地，不访问付费API或个人账户。第一项保存Moran统计、连边计数、置换Z与三联图；第二项保存RNA/ADT交集、缺失列表、按ID重排结果、batch×condition表和已保存结果字段审阅。
+
+先用一个角点和一个内部点手数邻居，再预测整个四邻接图的连边数。运行后将`--neighbors queen`改成八邻接，记录连边和Moran统计变化。网格Moran可与data/raw中的旧教学值核对；Z分数的置换实现与旧Squidpy不同，先比较构造区域及方向，不承诺逐项相同。
+
+真实大对象、深度学习整合、拟时序、RNA velocity、细胞通讯与完整AIRR管线属于拓展，基础包没有重新运行它们；来源与准备条件见sources。项目填写records中的任务说明书、图注与贡献记录，独立任务见exercises。

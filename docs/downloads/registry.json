@@ -167,6 +167,31 @@
         "scripts/01_check_sequences.py",
         "scripts/02_map_ids.py"
       ]
+    },
+    {
+      "chapter": 14,
+      "title": "单细胞转录组数据处理与可视化",
+      "version": "2026-10-02",
+      "file": "chapter-14-practice.zip",
+      "sha256": "995f311fd64f6b004c8ee2811c38aedf760ba68b87651f89fed14deb6b467d30",
+      "size": 27509,
+      "entrypoints": [
+        "scripts/01_object_and_qc.py",
+        "scripts/02_review_reference.py",
+        "scripts/03_seurat.R"
+      ]
+    },
+    {
+      "chapter": 15,
+      "title": "单细胞进阶、空间组学与综合项目",
+      "version": "2026-10-02",
+      "file": "chapter-15-practice.zip",
+      "sha256": "9537bcc03acce324af5d8f66704409c5aea42b9b40500287c042f6628056512b",
+      "size": 21056,
+      "entrypoints": [
+        "scripts/01_grid_analysis.py",
+        "scripts/02_alignment_and_reference.py"
+      ]
     }
   ]
 }
