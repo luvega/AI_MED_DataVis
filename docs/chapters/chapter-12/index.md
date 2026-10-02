@@ -57,29 +57,45 @@
 ## 章节总览图
 
 ```mermaid
-flowchart LR
-  A["FASTQ 与质量分数"] --> B["read 级 QC 与修剪"]
-  B --> C["比对或转录本定量"]
-  C --> D["GTF/GFF 注释与基因汇总"]
-  D --> E["raw count matrix"]
-  E --> F["metadata 对齐"]
-  F --> G["设计公式与比较方向"]
-  G --> H["size factor、dispersion 与模型"]
-  H --> I["差异表达结果表"]
-  E --> V["VST展示矩阵"]
-  V --> J["PCA与热图"]
-  I --> W["火山图"]
-  I --> J
-  I --> K["ORA 或 GSEA"]
-  J --> L["观察、统计、解释与验证"]
-  W --> L
-  K --> L
-  L --> M["AI 协作记录"]
+flowchart TB
+  U["上游来源：FASTQ与质量<br/>参考基因组、GTF/GFF"] --> U2["read QC、比对或定量、基因汇总"]
+  U2 --> C["原始整数计数<br/>基因×样本"]
+  C --> A["样本ID及顺序对齐<br/>设计：~ cell + dex"]
+  M["metadata<br/>sample_id、cell、dex"] --> A
+  A --> F["预过滤与DESeq2拟合<br/>size factor、dispersion、负二项模型"]
+  F --> D["已拟合dds<br/>保留计数、设计与估计信息"]
+  D -->|trt相对untrt| R["完整差异结果表"]
+  D --> V["VST展示矩阵<br/>blind=FALSE"]
+  V --> P["PCA：坐标与解释方差"]
+  V -->|表达数值| H["选定基因热图<br/>按基因做z-score"]
+  R --> S["按padj等规则选择基因ID"]
+  S -->|只选基因| H
+  R --> W["火山图<br/>log2FC与−log10(padj)"]
+  R --> O["ORA：阈值集合与有效背景"]
+  R --> G["GSEA：完整有效排序向量"]
+  DB["ID映射、数据库版本与基因集"] --> O
+  DB --> G
+  M -. "颜色/形状" .-> P
+  M -. "样本注释" .-> H
+  P --> E["结果与参数核对、解释和运行记录"]
+  H --> E
+  W --> E
+  O --> E
+  G --> E
+  class U,C,M,DB input;
+  class U2,A,F,D,V,S process;
+  class R,P,H,W,O,G result;
+  class E review;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
 
 ![第12章教学流程与关系](assets/chapter-12-rnaseq-data-chain.png)
 
-计数矩阵与样本信息分别进入分析对象。DESeq2以原始整数计数、样本标准化因子及设计拟合模型；图中分组与批次为结构示意，airway的具体设计在正文给出。
+原始计数与metadata对齐后进入DESeq2对象，按设计拟合模型。已拟合对象分别提供差异结果表和VST展示矩阵：PCA使用VST，热图颜色也来自VST；差异结果只参与热图的基因选择。火山图读取效应与padj，ORA和GSEA分别使用候选集合及背景、完整排序及基因集。
 
 ## 12.1 从 FASTQ 到计数矩阵
 
@@ -731,33 +747,37 @@ GO、KEGG、Reactome 和 MSigDB 提供的是整理后的知识库或基因集集
 
 ```mermaid
 flowchart TB
-  A["RNA-seq 原始数据"] --> A1["FASTQ: reads + quality"]
-  A1 --> A2["QC、修剪、比对或定量"]
-  A2 --> A3["GTF/GFF 与基因汇总"]
-  A3 --> B["raw count matrix"]
-  B --> C["metadata"]
-  C --> C1["sample ID 对齐"]
-  C --> C2["biological replicate"]
-  C --> C3["batch / cell / condition"]
-  C1 --> D["design formula + contrast"]
-  C2 --> D
-  C3 --> D
-  D --> E["DESeq2"]
-  E --> E1["size factor"]
-  E --> E2["dispersion"]
-  E --> E3["negative binomial GLM"]
-  E --> F["result table"]
-  F --> F1["log2FoldChange + lfcSE"]
-  F --> F2["pvalue + padj"]
-  B --> V["VST展示矩阵"]
-  V --> G["PCA / heatmap"]
-  F --> G1["volcano"]
-  F --> G
-  F --> H["ORA / GSEA"]
-  G --> I["observation and boundary"]
-  G1 --> I
-  H --> I
-  I --> J["AI record and human verification"]
+  C["原始基因计数"] --> A["计数列名与metadata行名对齐"]
+  M["sample ID、cell、dex<br/>生物学重复与设计"] --> A
+  A --> D["DESeq2对象与预过滤"]
+  D --> F["size factor→dispersion→负二项模型"]
+  F --> FD["已拟合dds"]
+  FD --> R["完整结果：gene_id、log2FC、lfcSE<br/>stat、pvalue、padj与比较方向"]
+  FD --> V["VST展示矩阵"]
+  V --> P["PCA与样本结构"]
+  V -->|表达数值| H["选定基因的行z-score热图"]
+  R -->|基因选择| H
+  R --> W["火山图：效应与统计字段"]
+  R --> O["ORA：候选集+有效背景"]
+  R --> G["GSEA：完整排序+基因集"]
+  DB["ID、物种、注释/基因集版本"] --> O
+  DB --> G
+  M -. "样本注释" .-> P
+  M -. "样本注释" .-> H
+  P --> E["输入、方法、结果与解释复核"]
+  H --> E
+  W --> E
+  O --> E
+  G --> E
+  class C,M,DB input;
+  class A,D,F,FD,V process;
+  class R,P,H,W,O,G result;
+  class E review;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
 
 ## 实验或作业

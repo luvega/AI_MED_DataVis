@@ -5,18 +5,40 @@
 前十章处理的对象多是分析表。每行对应一个样本，每列只有数量有限的变量。进入表达谱、蛋白组、代谢组或药物特征分析后，单个样本可能对应数千个特征。数据仍可写成二维表，但分析重点已经转向矩阵结构、样本间关系和高维变化方向。
 
 ```mermaid
-flowchart LR
-  A["数值矩阵"] --> B["核对样本与特征"]
-  M["metadata"] --> B
-  B --> C["转换与标准化"]
-  C --> D["距离度量"]
-  C --> E["PCA"]
-  D --> F["聚类"]
-  F --> G["热图"]
-  E --> H["参数敏感性复核"]
-  G --> H
-  H --> I["观察、边界与后续验证"]
+flowchart TB
+  X["数值矩阵X<br/>样本×特征"] --> CK["ID与顺序、缺失、重复、零方差核对"]
+  M["metadata<br/>sample_id、group、batch"] --> CK
+  CK --> T["按数值含义选择转换、中心化与缩放"]
+  T --> Z["分析矩阵Z<br/>保留样本与特征名称"]
+  Z --> P["PCA"]
+  P --> PO["scores、loadings、解释方差PVE"]
+  Z --> D["距离度量与linkage"]
+  D --> HC["层次树、切树成员与顺序"]
+  Z --> KM["k-means<br/>k、初始化与seed"]
+  KM --> KO["成员标签"]
+  Z -->|数值及转置| H["热图<br/>色值、行列顺序与注释条"]
+  HC -->|排序依据| H
+  M -. "颜色与形状" .-> PO
+  M -. "注释条" .-> H
+  PO --> S["只改变一项参数<br/>比较数值、成员与图形"]
+  HC --> S
+  KO --> S
+  H --> S
+  S --> R["稳定与变化观察<br/>复核记录及后续验证"]
+  class X,M input;
+  class CK,T,Z,P,D,KM process;
+  class PO,HC,KO,H result;
+  class S,R review;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
+
+![第11章矩阵、PCA、聚类与热图的输入关系](assets/chapter-11-matrix-analysis-map.png)
+
+图中数值矩阵与metadata分别进入核对；处理后的矩阵用于PCA、聚类和热图，metadata提供样本着色与注释。热图色值来自矩阵，行列顺序可由聚类确定。各支路共同接受预处理和参数变化的复核。
 
 本章从已形成的数值矩阵出发，训练学生检查输入、解释输出和复核参数。第12章进一步讨论RNA-seq数据如何形成及怎样比较条件；第14章再将这些方法接到单细胞对象。
 
@@ -707,34 +729,39 @@ R 的 scaled PVE 同样为 0.7661、0.1999、0.0192 和 0.0105。PCA 轴的正�
 ## 本章知识结构
 
 ```mermaid
-flowchart TD
-  A["高维小样本"] --> B["矩阵与metadata"]
-  B --> B1["方向与ID"]
-  B --> B2["缺失、重复、零方差"]
-  B --> C["预处理"]
-  C --> C1["log转换"]
-  C --> C2["normalization"]
-  C --> C3["standardization"]
-  C --> D["距离度量"]
-  D --> D1["欧氏距离"]
-  D --> D2["相关距离"]
-  C --> E["PCA"]
-  E --> E1["scores"]
-  E --> E2["loadings"]
-  E --> E3["PVE"]
-  D --> F["聚类"]
-  F --> F1["层次聚类与linkage"]
-  F --> F2["k-means与k"]
-  F --> G["热图"]
-  G --> G1["颜色尺度"]
-  G --> G2["注释条"]
-  G --> G3["特征筛选"]
-  E --> H["参数敏感性"]
-  G --> H
-  H --> I["稳定观察"]
-  H --> J["变化观察"]
-  I --> K["后续验证"]
-  J --> K
+flowchart TB
+  A["高维矩阵与metadata"] --> B["方向、ID、缺失、重复、零方差"]
+  B --> C["按数据含义选择预处理"]
+  C --> C1["log转换、中心化、可选缩放<br/>记录对象、方向与参数"]
+  C1 --> X["分析矩阵：样本×特征"]
+  X --> P["PCA"]
+  P --> PS["样本scores"]
+  P --> PL["特征loadings"]
+  P --> PV["解释方差PVE"]
+  X --> D["欧氏/相关等距离"]
+  D --> L["层次聚类：linkage与切树规则"]
+  X --> K["k-means：k、初始化与seed"]
+  X -->|转置后提供色值| H["热图"]
+  L -->|行列排序| H
+  M["metadata"] -. "颜色/形状" .-> PS
+  M -. "样本注释条" .-> H
+  H --> H1["特征筛选、颜色尺度与截断规则"]
+  PS --> R["预处理、距离、linkage、k的敏感性比较"]
+  PL --> R
+  PV --> R
+  L --> R
+  K --> R
+  H1 --> R
+  R --> E["稳定观察、变化观察与复核记录"]
+  class A,M input;
+  class B,C,C1,X,P,D,L,K process;
+  class PS,PL,PV,H,H1 result;
+  class R,E review;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
 
 ## 实验或作业

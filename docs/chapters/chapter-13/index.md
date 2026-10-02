@@ -19,7 +19,7 @@
 
 ![图13-1 公共生物医学数据的来源与复核链条](assets/chapter-13-public-data-provenance-imagegen.png)
 
-*图13-1　六个环节依次表示：1，形成可检索的问题；2，定位数据库记录和 accession；3，核对元数据、许可与引用；4，识别序列、reads、变异和 ID 映射文件；5，保存本地文件、下载清单与校验记录；6，在人工复核下开展有边界的下游任务。这些环节连接检索记录、文件身份与分析输入。*
+*图13-1　公共数据任务先记录问题、accession、样本单位、取得日期、许可引用与文件身份，再按所需对象核对。格式识读、变异核对、ID映射、表达谱分类、分子相似性或虚拟筛选使用各自输入，分别保存相应输出和评价记录。*
 
 ## 核心概念速查
 
@@ -39,13 +39,29 @@
 
 ```mermaid
 flowchart TB
-  P["问题: 想用公开数据做医药分析"] --> S1["检索数据库"]
-  S1 --> S2["记录 accession 和样本层级"]
-  S2 --> S3["下载或导出小规模教学文件"]
-  S3 --> S4["检查 FASTQ/VCF/ID 映射"]
-  S4 --> S5["拆解表达谱分类、结构相似性或虚拟筛选任务"]
-  S5 --> S6["记录计算性能与模型性能"]
-  S6 --> S7["写出证据边界和仍需验证内容"]
+  Q["具体医药问题<br/>对象、物种与所需数据"] --> DB["按任务检索数据库"]
+  DB --> R["accession、平台、样本单位<br/>研究设计与查询日期"]
+  R --> F["许可引用、文件身份<br/>取得方式、校验和与本地清单"]
+  F --> CK["核对格式、版本、ID及样本说明"]
+  CK --> S["FASTA/FASTQ结构识读"]
+  CK --> V["VCF位点与参考坐标核对"]
+  CK --> I["ID映射与未匹配记录"]
+  CK --> C["表达矩阵+标签<br/>分类与评价"]
+  CK --> M["结构身份、相似性<br/>或具备输入后的虚拟筛选"]
+  S --> O["对应输出、运行状态、指标与人工复核"]
+  V --> O
+  I --> O
+  C --> O
+  M --> O
+  class Q,DB input;
+  class R,F,CK process;
+  class S,V,I,C,M result;
+  class O review;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
 
 ## 13.1 GEO、SRA 与 NCBI 数据检索
@@ -58,13 +74,23 @@ GEO 的 `GSE` 是 series 层级，通常描述一项研究或一组相关实验�
 
 ```mermaid
 flowchart LR
-  GSE["GSE: series"] --> GSM["GSM: sample"]
-  GSE --> GPL["GPL: platform"]
-  GSM --> SRS["SRS: SRA sample"]
-  GSM --> SRX["SRX: experiment"]
-  SRX --> SRR["SRR: run"]
-  GSE --> SRP["SRP: SRA study"]
-  SRP --> SRX
+  subgraph GEO["GEO记录"]
+    GSE["GSE：series"] -->|包含样本记录| GSM["GSM：sample"]
+    GSE -->|平台说明| GPL["GPL：platform"]
+  end
+  subgraph SRA["SRA测序记录"]
+    SRP["SRP：study"] -->|组织实验| SRX["SRX：experiment"]
+    SRS["SRS：sample"] -->|样本关联| SRX
+    SRX -->|测序run| SRR["SRR：run"]
+  end
+  GSE -. "研究提供SRA链接时" .-> SRP
+  GSM -. "测序样本关联" .-> SRS
+  class GSE,GSM,GPL,SRP,SRX,SRS,SRR input;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
 
 **核验框：GSE35570（查询日期：2026-07-10）。** [GSE35570](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE35570)的本地历史记录保存了两个计数口径。当日页面列出 116 条 sample 记录；overall design 描述 65 例病例，其中 33 例为暴露组、32 例为非暴露组。
@@ -268,16 +294,25 @@ print(filters)
 真实变异分析通常从 FASTQ 质量检查开始，经过比对、排序、去重复或其他处理，生成 BAM，再由工具输出 VCF。IGV 或 UCSC Genome Browser 可以把参考基因组、reads 覆盖、候选变异和注释放到同一视图中审阅。
 
 ```mermaid
-flowchart LR
-  FQ["FASTQ reads"] --> QC["质量检查"]
-  QC --> ALN["比对到参考基因组"]
-  ALN --> BAM["BAM/CRAM"]
-  BAM --> CALL["变异调用"]
-  CALL --> VCF["VCF"]
-  REF["参考基因组版本"] --> ALN
-  REF --> VIEW["IGV/UCSC 浏览"]
+flowchart TB
+  FQ["FASTQ<br/>reads与质量"] --> QC["质量检查"]
+  QC --> ALN["比对与样本核对"]
+  REF["参考基因组版本<br/>染色体命名"] --> ALN
+  ALN --> BAM["BAM/CRAM<br/>比对记录"]
+  BAM --> CALL["变异调用<br/>样本与方法<br/>过滤参数"]
+  REF --> CALL
+  CALL --> VCF["VCF：位点<br/>REF/ALT与FILTER"]
+  REF --> VIEW["IGV/UCSC<br/>同一参考下核对<br/>覆盖与等位基因"]
   BAM --> VIEW
   VCF --> VIEW
+  class FQ,REF input;
+  class QC,ALN,CALL process;
+  class BAM,VCF,VIEW result;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
 
 可视化检查要记录“看到了什么”，还要记录“不能说什么”。IGV 截图如果没有参考版本、染色体命名、位置、track 来源和过滤状态，就不适合作为课程项目证据。
@@ -467,25 +502,30 @@ AI 输出摘要：
 
 ```mermaid
 flowchart TB
-  A["公共数据库"] --> A1["GEO: GSE/GSM/GPL"]
-  A --> A2["SRA: SRP/SRX/SRS/SRR"]
-  A --> A3["Ensembl: gene ID"]
-  A --> A4["PubChem: CID/SMILES"]
-  B["下载记录"] --> B1["命令"]
-  B --> B2["工具版本"]
-  B --> B3["许可与引用"]
-  C["文件对象"] --> C1["FASTA"]
-  C --> C2["FASTQ"]
-  C --> C3["VCF"]
-  D["分析任务"] --> D1["ID 转换"]
-  D --> D2["变异可视化"]
-  D --> D3["表达谱分类"]
-  D --> D4["分子相似性"]
-  D --> D5["虚拟筛选"]
-  E["评价与边界"] --> E1["计算性能"]
-  E --> E2["模型性能"]
-  E --> E3["证据边界"]
-  A --> B --> C --> D --> E
+  Q["问题与数据需求"] --> R["公共数据库记录<br/>GEO/SRA<br/>Ensembl/PubChem"]
+  R --> M["日期与accession<br/>许可、引用与文件校验"]
+  M --> S["FASTA/FASTQ<br/>序列/read结构检查"]
+  M --> V["VCF+参考版本<br/>位点与浏览核对"]
+  M --> I["ID+物种/版本<br/>缓存、映射与状态"]
+  M --> E["表达矩阵+标签<br/>分类与划分<br/>按类指标"]
+  M --> C["SMILES/CID<br/>结构与指纹相似性"]
+  M --> D["靶标+化合物库<br/>对接参数与候选排序"]
+  S --> O["对应结果与运行记录"]
+  V --> O
+  I --> O
+  E --> O
+  C --> O
+  D --> O
+  O --> P["计算性能、模型性能<br/>复核与适用范围"]
+  class Q,R input;
+  class M process;
+  class S,V,I,E,C,D,O result;
+  class P review;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
 
 综合作业分四步完成。第一步选择一个公共表达谱数据集，提交检索记录卡。第二步为已给本地文件写来源与完整性登记表，拓展任务才选择已核验的SRR run。第三步解释 FASTQ 或 VCF 小片段，并运行一个结构检查脚本。第四步写一个医药 AI 任务说明书，说明输入、标签、模型、指标、边界和仍需验证。

@@ -70,6 +70,8 @@ HOMEPAGE_COVER_SOURCE = (
 HOMEPAGE_COVER_TARGET = (
     DOCS_ROOT / "assets" / "images" / "medical-data-visualization-homepage-cover-imagegen.png"
 )
+HOMEPAGE_MAP_SOURCE = SOURCE_ROOT / "assets/homepage/course-five-parts-map.png"
+HOMEPAGE_MAP_TARGET = DOCS_ROOT / "assets/images/course-five-parts-map.png"
 
 
 def read_text(path: Path) -> str:
@@ -282,18 +284,11 @@ def build_homepage() -> str:
 | 代码和图表是否可信 | 核对输入、处理步骤、真实输出、统计前提和文件变更 | 脚本、运行记录、图表与结果表 |
 | 当前结果能说明什么 | 区分观察、统计推断、模型关联、医学解释和仍需验证内容 | 解释卡、核验清单、证据包 |
 
-## 从问题到证据包
+## 全书学习路线
 
-```mermaid
-flowchart LR
-  A["医学或药学问题"] --> B["数据对象与来源"]
-  B --> C["任务说明书"]
-  C --> D["处理、统计与可视化"]
-  D --> E["真实输出"]
-  E --> F["人工核验"]
-  F --> G["证据包"]
-  G --> H["允许解释与仍需验证"]
-```
+![五篇、15章的学习路线与阶段产物](assets/images/course-five-parts-map.png)
+
+从问题与项目环境开始，经过数据整理、图表与统计模型，再进入高维分析、组学和综合项目。图中箭头表示学习顺序；各篇按教学任务选择数据，具体章节与产物见下表。
 
 | 统一主线 | 递进关系 | 读者要形成的能力 |
 | --- | --- | --- |
@@ -416,6 +411,7 @@ def main() -> None:
     copy_chapters(chapters)
     copy_support_files()
     copy_homepage_cover()
+    copy_file(HOMEPAGE_MAP_SOURCE, HOMEPAGE_MAP_TARGET)
     write_text(DOCS_ROOT / "index.md", build_homepage())
     for markdown in (DOCS_ROOT / 'teaching').glob('*.md'):
         write_text(markdown, public_punctuation(read_text(markdown)))

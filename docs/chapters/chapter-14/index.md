@@ -20,19 +20,31 @@
 ### 分析主线
 
 ```mermaid
-flowchart LR
-    A["原始计数与样本信息"] --> B["对象与矩阵核验"]
-    B --> C["empty droplet、低质量细胞、ambient RNA、doublet"]
-    C --> D["保留 raw counts 并建立 QC 记录"]
-    D --> E["归一化与特征选择"]
-    E --> F["PCA"]
-    F --> G["KNN 或 SNN 邻接图"]
-    G --> H["Leiden 等图聚类"]
-    F --> I["基于 PC 坐标的 UMAP"]
-    H --> J["marker 与参考注释"]
-    E --> J
-    J -. "按标签着色" .-> I
-    J --> K["候选标签、置信度与解释边界"]
+flowchart TB
+  IN["计数与cell/sample/donor信息"] --> QC["对象核对与QC<br/>空液滴、低质量、ambient RNA、doublet"]
+  QC --> C["独立保留counts与QC记录"]
+  C --> N["LogNormalize<br/>归一化表达data"]
+  C --> HV["本例vst从counts选HVG"]
+  N --> SC["选定基因的ScaleData<br/>scale.data"]
+  HV --> SC
+  SC --> P["PCA坐标"]
+  P --> NN["FindNeighbors<br/>KNN/SNN图"]
+  NN --> CL["FindClusters<br/>本例默认Louvain、resolution"]
+  P --> U["RunUMAP<br/>独立构建UMAP邻域与坐标"]
+  N --> MK["marker检验与表达展示"]
+  CL -->|分组标签| MK
+  MK --> AN["marker组合+参考资料<br/>候选注释"]
+  U --> PL["UMAP着色图"]
+  CL -. "cluster颜色" .-> PL
+  AN -. "候选标签颜色" .-> PL
+  class IN,C input;
+  class QC,N,HV,SC,P,NN,CL,U,MK process;
+  class AN,PL result;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
 
 | 案例 | 本章角色 | 运行状态 | 解释边界 |
@@ -43,7 +55,7 @@ flowchart LR
 
 ![第14章教学流程与关系](assets/chapter-14-single-cell-workflow.png)
 
-单细胞计数经QC、归一化和特征选择进入PCA。PC坐标分别用于邻接图聚类与UMAP；聚类标签结合表达矩阵形成marker检查和候选注释，再在UMAP上显示。下方供体组为层级示意。
+原始计数独立保存，表达层和特征集合按所用方法记录。本例Seurat的vst读取counts，归一化表达与选定特征经ScaleData进入PCA；PC坐标分别用于聚类图与UMAP。marker读取表达值和分组标签，候选标签再用于UMAP着色。下方供体组为层级示意。
 
 ## 14.1 单细胞数据对象与矩阵结构
 
@@ -620,26 +632,33 @@ marker 表至少同时报告效应大小、表达细胞比例、比较集合、�
 
 ```mermaid
 flowchart TB
-    A["单细胞计数对象"] --> A1["表达矩阵与稀疏结构"]
-    A --> A2["细胞 metadata"]
-    A --> A3["基因 metadata"]
-    A --> A4["counts、normalized、scaled layers"]
-    A2 --> B["质控与来源记录"]
-    B --> B1["empty droplet"]
-    B --> B2["低质量细胞"]
-    B --> B3["ambient RNA"]
-    B --> B4["doublet"]
-    A4 --> C["归一化与特征选择"]
-    C --> D["PCA"]
-    D --> E["KNN 或 SNN 图"]
-    E --> F["Leiden 等聚类"]
-    E --> G["UMAP"]
-    F --> H["marker 组合"]
-    G --> H
-    H --> I["人工与参考注释"]
-    E --> J
-    J -. "按标签着色" .-> I["候选标签与置信度"]
-    J --> K["统计单位、替代解释、验证需求"]
+  O["单细胞对象<br/>表达层、cell与gene metadata"] --> QC["QC与来源记录"]
+  QC --> C["保留原始counts"]
+  C --> N["归一化表达data"]
+  C --> HV["本例vst选择HVG"]
+  N --> SC["HVG表达缩放为scale.data"]
+  HV --> SC
+  SC --> P["PCA：细胞坐标、载荷与方差"]
+  P --> NN["KNN/SNN图"]
+  NN --> CL["图聚类标签<br/>算法、resolution与seed"]
+  P --> U["UMAP独立邻域与坐标"]
+  N --> MK["marker：效应、表达比例与检验字段"]
+  CL -->|比较分组| MK
+  MK --> AN["marker组合+参考<br/>候选标签及依据"]
+  U --> PL["坐标与颜色合成展示"]
+  CL -. "cluster标签" .-> PL
+  AN -. "候选注释" .-> PL
+  AN --> E["统计单位、替代解释与验证需求"]
+  PL --> E
+  class O,C input;
+  class QC,N,HV,SC,P,NN,CL,U,MK process;
+  class AN,PL result;
+  class E review;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
 
 ## 作业要求

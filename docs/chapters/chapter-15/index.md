@@ -19,9 +19,32 @@
 
 案例分别保留来源运行、2026-07-16本机复跑和教学构造的记录。学生基础包使用本地构造输入和有日期的参考结果；本次已实际运行网格及对齐练习，大对象再现从sources入口准备。
 
-![第15章教学流程与关系](assets/chapter-15-spatial-data-relations.png)
+### 本章分析路线
 
-空间表达矩阵按位置ID连接坐标和组织图，邻接关系由坐标定义。表达、坐标、图像与邻接结构分别核对，再组合分析。
+```mermaid
+flowchart TB
+  Q["具体问题与可用数据<br/>cell/sample/donor<br/>条件与观测单位核对"]
+  Q --> A["15.1 整合与条件比较<br/>batch/condition设计<br/>整合检查；样本层比较"]
+  Q --> B["15.2 方法选择<br/>拟时序／velocity<br/>细胞通讯"]
+  Q --> C["15.3 空间组学<br/>表达、坐标与建图<br/>邻域分析／空间自相关"]
+  Q --> D["15.4 配对多模态<br/>RNA/ADT/免疫受体<br/>ID对齐、QC与联合分析"]
+  A --> P["15.5 综合项目<br/>分析路线与阶段任务<br/>数据、代码与图表交付"]
+  B --> P
+  C --> P
+  D --> P
+  P --> R["15.6 复核与汇报<br/>代码、图表与结果解释<br/>说明关键决策"]
+  class Q input;
+  class A,B,C,D process;
+  class P result;
+  class R review;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
+```
+
+按问题与可用输入选择相应路线，再把数据字典、代码、结果表和图形组织成项目，完成复核与汇报。
 
 ## 15.1 批次效应、数据整合与条件比较
 
@@ -265,15 +288,37 @@ NicheNet 增加配体到靶基因的先验网络，并依据受体细胞中的�
 空间转录组把表达测量与位置联系起来。空间单位可能是 spot、bin、细胞、细胞核或单个 RNA 分子。不同单位的生物含义和独立性不同。Visium spot 可包含多个细胞；Xenium 等成像型平台可在分割后形成细胞级对象，但结果依赖分子检测和分割质量。
 
 ```mermaid
-flowchart LR
-  A["表达矩阵"] --> E["空间组学对象"]
-  B["x/y 坐标"] --> E
-  C["组织图像或分割"] --> E
-  D["sample/condition/region"] --> E
-  E --> F["空间邻接图"]
-  F --> G["邻域、共现和空间自相关"]
-  G --> H["带边界的结果解释"]
+flowchart TB
+  X["表达：spot或细胞×基因"] --> CK["同一位置ID与顺序核对"]
+  CO["坐标：位置ID、x/y<br/>单位、方向与切片"] --> CK
+  ME["metadata<br/>sample/donor、cluster/region"] --> CK
+  CK --> EX["对齐的表达向量"]
+  CK --> POS["对齐的坐标"]
+  CK --> LB["对齐的cluster标签"]
+  POS --> W["空间邻接/权重W<br/>网格、距离或kNN规则"]
+  POS --> MAP["选定基因的空间表达图"]
+  EX --> MAP
+  IMG["配准图像或分割<br/>说明空间单位"] -. "定位背景" .-> MAP
+  W --> NH["标签置换的邻域分析<br/>连边计数与富集Z"]
+  LB --> NH
+  W --> MO["Moran's I与置换结果"]
+  EX --> MO
+  NH --> SEN["改变邻接规则<br/>比较两类结果的变化"]
+  MO --> SEN
+  class X,CO,ME,IMG input;
+  class CK,EX,POS,LB,W process;
+  class MAP,NH,MO result;
+  class SEN review;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
+
+![空间表达、坐标与邻接分析的对象关系](assets/chapter-15-spatial-data-relations.png)
+
+空间表达与坐标按同一位置ID和顺序对齐，邻接关系由坐标及建图规则确定。选定基因的空间颜色来自表达值；邻域富集使用标签与邻接图，Moran’s I使用表达向量与空间权重。图中的小对象为教学构造示意，组织图像或分割经配准后提供定位背景。
 
 AnnData 常把观测注释放在 `.obs`，特征注释放在 `.var`，空间坐标放在 `.obsm["spatial"]`，空间邻接矩阵放在 `.obsp`。SpatialData 还能联合保存图像、点、形状和表格。Bioconductor 的 SpatialExperiment 使用 `assays`、`colData`、`spatialCoords` 和 `imgData` 组织相同类型的信息。
 
@@ -418,16 +463,26 @@ dsp <- dsp_test(
 CITE-seq 同时测量 RNA 与抗体衍生标签（Antibody-Derived Tags，ADT）。免疫受体数据记录 TCR 或 BCR 的链、V(D)J 基因和 CDR3。配对 multiome 还可在同一细胞中测量 RNA 与染色质可及性。多模态分析的第一步是确认哪些模态来自同一细胞，以及对齐过程中丢失了多少细胞。
 
 ```mermaid
-flowchart LR
-  A["cell barcode"] --> B["RNA AnnData"]
-  A --> C["ADT AnnData"]
-  A --> D["TCR/BCR contigs"]
-  A --> E["ATAC 或空间信息"]
-  B --> F["共享 metadata"]
-  C --> F
-  D --> F
-  E --> F
-  F --> G["交集、缺失和冲突记录"]
+flowchart TB
+  R["RNA对象"] --> CK["核对各模态索引与元数据"]
+  A["ADT对象"] --> CK
+  T["TCR/BCR多条链记录<br/>先归属到细胞"] --> CK
+  ID["sample/donor/centre+barcode<br/>唯一复合cell ID"] --> CK
+  CK --> JOIN["交集或保留集合、独有项与冲突"]
+  JOIN --> ALIGN["按同一ID顺序切片<br/>核对sample与donor一致"]
+  ALIGN --> M["对齐的多模态对象<br/>各模态QC与归一化"]
+  M --> OUT["按问题选择联合表示或模态比较"]
+  AT["配对ATAC：确为同细胞时"] -. "核对ID后接入" .-> CK
+  SP["空间信息：先核验spot/细胞单位<br/>及匹配、配准或参考映射依据"] --> SCK["记录空间匹配依据与缺失"]
+  SCK -. "条件匹配后接入" .-> OUT
+  class R,A,T,ID,AT,SP input;
+  class CK,JOIN,ALIGN,M,SCK process;
+  class OUT result;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
 
 ### 15.4.2 案例一：NeurIPS CITE-seq 的 ADT 质控
@@ -628,14 +683,26 @@ assert list(adata.uns["spatial"]) == ["V1_Adult_Mouse_Brain"]
 ### 15.5.4 分析路线
 
 ```mermaid
-flowchart TD
-  A["核对来源与许可"] --> B["检查表达、坐标、cluster、sample"]
-  B --> C["定义空间邻接规则"]
-  C --> D["邻域富集与连边计数"]
-  D --> E["空间模式或 Moran's I"]
-  E --> F["改变邻接规则做敏感性检查"]
-  F --> G["生成图表设计规范卡和解释卡"]
-  G --> H["导出代码、环境、图表和 AI 记录"]
+flowchart TB
+  A["来源、许可与文件身份"] --> B["表达、坐标、cluster、切片ID核对"]
+  B --> C["定义邻接规则并生成空间权重"]
+  C --> D["cluster+邻接图+标签置换<br/>连边计数与邻域富集"]
+  C --> E["基因表达+空间权重<br/>Moran's I"]
+  B -->|提供标签| D
+  B -->|提供表达| E
+  D --> F["改变邻接圈数<br/>分别重算并比较结果"]
+  E --> F
+  F --> G["图表规范卡、结果表与解释卡"]
+  G --> H["导出代码、环境、图表与协作记录"]
+  class A,B input;
+  class C,D,E process;
+  class F review;
+  class G,H result;
+
+  classDef input fill:#F3F8FC,stroke:#1A3A5C,color:#1A3A5C;
+  classDef process fill:#FFFFFF,stroke:#008A95,color:#17374A;
+  classDef result fill:#EDF8F6,stroke:#008A95,color:#17374A;
+  classDef review fill:#FFF8EB,stroke:#B18B31,color:#17374A;
 ```
 
 本项目先检查对象形状、坐标和 cluster，再以 `coord_type="grid"` 构建邻接图。邻域富集在 cluster 标签上做 1,000 次置换。Moran’s I 用于度量 Nrgn 和 Ttr 在当前邻接图上的全局空间自相关。

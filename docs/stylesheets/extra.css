@@ -226,6 +226,7 @@ body {
   margin: 1.5rem 0 2rem;
   overflow-x: auto;
   padding: 1rem;
+  overscroll-behavior-x: contain;
 }
 
 .md-typeset .mermaid svg {
@@ -233,6 +234,16 @@ body {
   height: auto;
   margin-inline: auto;
   max-width: 100%;
+}
+
+.md-typeset a.figure-original {
+  cursor: zoom-in;
+  display: block;
+}
+
+.md-typeset a.figure-original img {
+  display: block;
+  margin-inline: auto;
 }
 
 .md-nav__link {
@@ -248,6 +259,13 @@ body {
   padding-right: 0.8rem;
 }
 
+/* Give teaching figures the reading column on ordinary laptop widths too. */
+@media screen and (min-width: 60em) {
+  .md-sidebar--secondary:not([hidden]) {
+    display: none;
+  }
+}
+
 @media screen and (min-width: 76.25em) {
   .md-grid {
     max-width: min(94vw, 1500px);
@@ -258,7 +276,7 @@ body {
     width: 14.5rem;
   }
 
-  .md-sidebar--secondary {
+  .md-sidebar--secondary:not([hidden]) {
     display: none;
   }
 
