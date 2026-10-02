@@ -7,7 +7,7 @@ import re
 import zipfile
 from pathlib import Path, PurePosixPath
 
-TEXT_SUFFIXES = {'.md', '.txt', '.csv', '.json', '.yml', '.yaml', '.py', '.r', '.tsv'}
+TEXT_SUFFIXES = {'.md', '.txt', '.csv', '.json', '.yml', '.yaml', '.py', '.r', '.tsv', '.fasta', '.fa', '.fastq', '.fq', '.vcf'}
 ALLOWED_SUFFIXES = TEXT_SUFFIXES | {'.xlsx', '.png', '.svg', '.pdf', '.rds', '.mtx', '.gz', '.fasta', '.fa', '.fastq', '.fq', '.vcf'}
 
 
@@ -39,9 +39,11 @@ def build_package(root: Path, destination: Path) -> dict:
     spec = json.loads((root / 'bundle.json').read_text(encoding='utf-8-sig'))
     files = package_files(root)
     relative_names = {p.relative_to(root).as_posix() for p in files}
-    for required in ('README.md', 'data_dictionary.md', 'sources.md', 'exercises.md', 'outputs/README.md'):
-        if required not in relative_names:
-            raise ValueError(f'Missing {required} in chapter {spec["chapter"]}')
+    required_groups = [('README.md',), ('data_dictionary.md','data/data_dictionary.md'),
+                       ('sources.md','sources/来源.md'), ('exercises.md','exercises/独立练习.md'), ('outputs/README.md',)]
+    for options in required_groups:
+        if not any(name in relative_names for name in options):
+            raise ValueError(f'Missing {options[0]} in chapter {spec["chapter"]}')
     for entry in spec['entrypoints']:
         if entry not in relative_names:
             raise ValueError(f'Missing entrypoint: {entry}')

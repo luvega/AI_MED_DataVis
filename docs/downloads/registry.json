@@ -1,6 +1,44 @@
 {
   "packages": [
     {
+      "chapter": 1,
+      "title": "医药数据分析导论",
+      "version": "2026-10-02",
+      "file": "chapter-01-practice.zip",
+      "sha256": "0720d00b9068cefdcd924bdd59cc778a1a8126a3469d68c94ef2ae92a2f7e996",
+      "size": 5653,
+      "entrypoints": [
+        "scripts/01_records.py"
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "AI生产力工具链与项目环境",
+      "version": "2026-10-02",
+      "file": "chapter-02-practice.zip",
+      "sha256": "efe4ec09364bfa9183ba2e4ef9eb155eb5db4f947918ad45a81aabcfa7bef7a4",
+      "size": 6592,
+      "entrypoints": [
+        "scripts/01_environment.py",
+        "scripts/02_release_path.py",
+        "scripts/03_environment.R"
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "AI任务说明书与协作规范",
+      "version": "2026-10-02",
+      "file": "chapter-03-practice.zip",
+      "sha256": "82590ae232b89a595eea6ae0eb822ae9ce29e08cf87f8912f79f948be5048738",
+      "size": 18246,
+      "entrypoints": [
+        "scripts/01_read.py",
+        "scripts/02_lolamicin.py",
+        "scripts/03_insulin.py",
+        "scripts/05_release_context.py"
+      ]
+    },
+    {
       "chapter": 4,
       "title": "Python与R数据结构基础",
       "version": "2026-10-02",

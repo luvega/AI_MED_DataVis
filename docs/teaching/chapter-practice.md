@@ -2,13 +2,13 @@
 
 下载对应章节的ZIP，解压后先读 `README.md`。输入保存在 `data/`，运行结果写入 `outputs/`。每个包的 `manifest.json` 列出版本、运行入口、编码与文件校验值。
 
-已发布 4 / 15 章；正文与练习包按批同步更新。
+已发布 7 / 15 章；正文与练习包按批同步更新。
 
 | 章节 | 练习包 | 版本 | 大小 |
 | --- | --- | --- | --- |
-| [第1章 医药数据分析导论](../chapters/chapter-1/index.md) | 本批尚未发布 | 待发布 | 待发布 |
-| [第2章 AI 生产力工具链与项目环境](../chapters/chapter-2/index.md) | 本批尚未发布 | 待发布 | 待发布 |
-| [第3章 AI 任务说明书与协作规范](../chapters/chapter-3/index.md) | 本批尚未发布 | 待发布 | 待发布 |
+| [第1章 医药数据分析导论](../chapters/chapter-1/index.md) | [下载ZIP](../downloads/chapter-01-practice.zip) | 2026-10-02 | 6 KB |
+| [第2章 AI 生产力工具链与项目环境](../chapters/chapter-2/index.md) | [下载ZIP](../downloads/chapter-02-practice.zip) | 2026-10-02 | 6 KB |
+| [第3章 AI 任务说明书与协作规范](../chapters/chapter-3/index.md) | [下载ZIP](../downloads/chapter-03-practice.zip) | 2026-10-02 | 18 KB |
 | [第4章 Python 与 R 数据结构基础](../chapters/chapter-4/index.md) | [下载ZIP](../downloads/chapter-04-practice.zip) | 2026-10-02 | 8 KB |
 | [第5章 数据读取、数据字典与数据质量](../chapters/chapter-5/index.md) | [下载ZIP](../downloads/chapter-05-practice.zip) | 2026-10-02 | 26 KB |
 | [第6章 数据整形、描述统计与探索性可视化](../chapters/chapter-6/index.md) | [下载ZIP](../downloads/chapter-06-practice.zip) | 2026-10-02 | 20 KB |
@@ -23,6 +23,61 @@
 | [第15章 单细胞进阶、空间组学与综合项目](../chapters/chapter-15/index.md) | 本批尚未发布 | 待发布 | 待发布 |
 
 前期练习以Python为主，R用于已有对照与适合的领域分析。RNA-seq、单细胞和进阶章节在README中区分实际运行入口、轻量练习与大型数据拓展。基础练习使用本地文件。
+
+<a id="chapter-1"></a>
+
+## 第1章开始说明
+
+# 第1章练习包
+
+先读两张小表，手工数记录、参与者和缺失，再填写question_card.md。birth_mode_counts.csv对应1.1的434份问卷汇总，guesses.csv对应1.2-1.3的五行糖豆构造表。
+
+本章以读表和确定问题为主。教师演示或课后想核对时，可在解压根目录运行 `python scripts/01_records.py`；脚本只使用Python标准库，将核对表写入outputs。独立任务在exercises.md，先独立作答再对照输出。
+
+包内没有出生时刻逐人原始表，若任务需要按小时作图，应先说明缺少何种输入。
+
+<a id="chapter-2"></a>
+
+## 第2章开始说明
+
+# 第2章练习包
+
+本包检查Python入口、工作目录、实际依赖和释放表路径，帮助你把一次运行与文件位置对应起来。基础入口只使用标准库，R入口只用基础R。
+
+在解压根目录依次运行。
+
+```text
+python scripts/01_environment.py
+python scripts/02_release_path.py
+Rscript scripts/03_environment.R
+```
+
+01报告当前Python和三个后续练习包状态，未安装的包如实标记。02读本包12行构造释放表并写出报告。03记录R版本与最小计算，不要求安装领域包。每个脚本可独立运行，结果写outputs。
+
+想查看某条语句，可以先输入 `2 + 3`，随后用print保存为短脚本。系统终端与Python交互提示符的区别参见正文。填写records.md与exercises.md。
+
+<a id="chapter-3"></a>
+
+## 第3章开始说明
+
+# 第3章练习包
+
+本包保留Lolamicin抗生素与葡萄糖响应胰岛素两项真实实验的完整读取、汇总和作图；释放构造表用于检验任务说明在更换实验后怎样修订。
+
+在解压根目录运行，Python需要requirements.txt中的包。
+
+```text
+python scripts/01_read.py
+python scripts/02_lolamicin.py
+python scripts/03_insulin.py
+python scripts/05_release_context.py
+```
+
+前三个入口对应3.1-3.3。还可运行 `python run_all.py` 完成相同主例和对比例。outputs保存本人生成图和汇总表。05读取12行构造释放表，只检查新问题的字段与对象，不拟合模型。
+
+scripts/04_column_error.py是主动设置的列名排错练习，按正文和exercises.md单独运行；它不属于正常验收入口。先看真实列名和字典，再修改并重跑。
+
+数据在data/raw，data_dictionary.md解释实验含义，task_template.md与records.md用于保存本人说明。独立任务先预测和作答，再检查实际输出。
 
 <a id="chapter-4"></a>
 

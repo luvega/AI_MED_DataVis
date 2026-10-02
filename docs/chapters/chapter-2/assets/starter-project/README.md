@@ -4,9 +4,9 @@
 
 ## 文件用途
 
-- `environment.yml`：第4-13章通用 Python 环境，包含表格处理、统计、建模、绘图和基础化学信息练习所需的 conda 包。
+- `environment.yml`：第4、13章通用 Python 环境，包含表格处理、统计、建模、绘图和基础化学信息练习所需的 conda 包。
 - `scripts/install_python_course_extras.py`：从官方 PyPI 安装 `ISLP` 与 `pysradb` 的课程固定版本。课程使用 `ISLP` 的内置数据和聚类辅助功能，因此不安装其未在本书使用的深度学习依赖。
-- `DESCRIPTION` 与 `renv.lock`：第4-12章通用 R/Bioconductor 环境，包含数据整理、绘图、统计建模及 `airway`/DESeq2 案例所需包。
+- `DESCRIPTION` 与 `renv.lock`：第4、12章通用 R/Bioconductor 环境，包含数据整理、绘图、统计建模及 `airway`/DESeq2 案例所需包。
 - `scripts/check_python_environment.py`：报告 Python 实际解释器、版本、工作目录和基础包，并生成 `outputs/python-smoke-test.txt`。
 - `scripts/check_r_environment.R`：报告 R 主目录、版本、包库、基础包和会话信息，并生成 `outputs/r-smoke-test.txt`。
 - `环境分层说明.md`：说明通用环境与第11、14、15章专用环境的边界。

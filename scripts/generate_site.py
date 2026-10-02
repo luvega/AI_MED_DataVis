@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import argparse
 import json
+import zipfile
 import re
 import shutil
 from pathlib import Path
@@ -178,6 +179,12 @@ def copy_chapters(chapters: list[int] | None = None) -> None:
         registry = load_registry(DOCS_ROOT / 'downloads/registry.json')
         package = next((p for p in registry['packages'] if p['chapter'] == chapter_number), None)
         if package:
+            with zipfile.ZipFile(DOCS_ROOT / 'downloads' / package['file']) as archive:
+                for target in re.findall(r'\[[^\]]*\]\((practice/[^)]+\.md)\)', content):
+                    member = unquote(target.removeprefix('practice/'))
+                    if member not in archive.namelist():
+                        raise ValueError(f'Linked practice document absent from verified ZIP: {target}')
+                    write_text(target_dir / unquote(target), archive.read(member).decode('utf-8-sig'))
             content += f'\n\n## 本章练习包\n\n[下载第{chapter_number}章学生练习包](../../downloads/{package["file"]}) · [查看全书练习包](../../teaching/chapter-practice.md)\n'
         write_text(target_dir / "index.md", content)
         for markdown in target_dir.rglob('*.md'):
